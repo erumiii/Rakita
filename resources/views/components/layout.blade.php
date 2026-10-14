@@ -43,7 +43,6 @@
             <x-errors />
             {{ $slot }}
         </main>
-        </main>
     </div>
 </div>
 @vite('resources/js/app.js')
