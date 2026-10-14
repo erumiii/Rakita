@@ -40,3 +40,89 @@
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, .06);
     --shadow-nav: 0 1px 2px rgba(0, 0, 0, .12), 0 4px 8px -2px rgba(0, 0, 0, .04);
 }
+
+@layer components {
+    .btn {
+        @apply inline-flex h-10 items-center justify-center rounded-lg border border-line-editor bg-white px-4 text-base text-ink shadow-nav transition-[background-color,border-color,box-shadow] duration-200 ease-out hover:bg-sidebar;
+    }
+
+    .btn-sm {
+        @apply inline-flex h-8 items-center justify-center rounded-md border border-line-editor bg-white px-3 text-hint text-ink shadow-nav transition-[background-color,border-color,box-shadow] duration-200 ease-out hover:bg-sidebar;
+    }
+
+    .btn-icon {
+        @apply inline-flex size-7 items-center justify-center rounded-md border border-line-editor bg-white text-ink shadow-nav transition-[background-color,border-color,box-shadow] duration-200 ease-out hover:bg-sidebar;
+    }
+
+    .btn-primary {
+        @apply inline-flex h-10 items-center justify-center rounded-lg bg-ink px-4 text-base text-white shadow-nav transition-[background-color,border-color,box-shadow,opacity] duration-200 ease-out hover:opacity-90;
+    }
+}
+
+@layer base {
+    /* Tailwind v4 preflight sets buttons to cursor: default — restore pointer. */
+    button:not(:disabled) {
+        cursor: pointer;
+    }
+}
+
+@view-transition {
+    navigation: auto;
+}
+
+.alert-enter {
+    animation: alert-in 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+dialog[data-modal] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+}
+
+dialog[data-modal][open] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition:
+        opacity 200ms ease-out,
+        transform 200ms ease-out,
+        overlay 200ms ease-out allow-discrete,
+        display 200ms ease-out allow-discrete;
+}
+
+dialog[data-modal]::backdrop {
+    background-color: rgb(0 0 0 / 0);
+    backdrop-filter: blur(0px);
+    transition:
+        background-color 200ms ease-out,
+        backdrop-filter 200ms ease-out,
+        overlay 200ms ease-out allow-discrete,
+        display 200ms ease-out allow-discrete;
+}
+
+dialog[data-modal][open]::backdrop {
+    background-color: rgb(0 0 0 / 0.3);
+    backdrop-filter: blur(2px);
+}
+
+@starting-style {
+    dialog[data-modal][open] {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    dialog[data-modal][open]::backdrop {
+        background-color: rgb(0 0 0 / 0);
+        backdrop-filter: blur(0px);
+    }
+}
+
+@keyframes alert-in {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

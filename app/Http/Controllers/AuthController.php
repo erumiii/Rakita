@@ -20,11 +20,11 @@ class AuthController extends Controller
         $user = User::whereRaw('LOWER(username) = ?', [strtolower($request->username)])->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            return back()->withErrors(['username' => 'Username atau password salah.'])->onlyInput('username');
+            return back()->withErrors(['username' => 'Incorrect username or password.'])->onlyInput('username');
         }
 
         if (! $user->is_active) {
-            return back()->withErrors(['username' => 'Akun dinonaktifkan.'])->onlyInput('username');
+            return back()->withErrors(['username' => 'This account has been deactivated.'])->onlyInput('username');
         }
 
         auth()->login($user, $request->boolean('remember'));

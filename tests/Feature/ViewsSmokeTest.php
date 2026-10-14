@@ -27,48 +27,38 @@ class ViewsSmokeTest extends TestCase
     {
         $this->get('/login')
             ->assertOk()
-            ->assertSee('Masuk')
-            ->assertSee('Belum punya akun?')
-            ->assertSee('Daftar');
+            ->assertSee('Sign In')
+            ->assertSee("Don't have an account?", false)
+            ->assertSee('Create an account');
 
         $this->get('/register')
             ->assertOk()
-            ->assertSee('Daftar')
-            ->assertSee('Konfirmasi Password')
-            ->assertSee('Sudah punya akun?');
+            ->assertSee('Register')
+            ->assertSee('Confirm Password')
+            ->assertSee('Already have an account?');
     }
 
-    public function test_employee_pages_render_with_indonesian_nav(): void
+    public function test_employee_pages_render_with_english_nav(): void
     {
         $employee = User::factory()->employee()->create();
         Book::factory()->create(['title' => 'Smoke Target', 'status' => 'isAvailable']);
 
         $this->actingAs($employee)->get('/employee/books')
             ->assertOk()
-            ->assertSee('Buku')
-            ->assertSee('Peminjaman')
-            ->assertSee('Pengembalian')
-            ->assertSee('Riwayat')
+            ->assertSee('Books')
+            ->assertSee('Borrow')
+            ->assertSee('Members')
             ->assertSee('Smoke Target');
-
-        $this->actingAs($employee)->get('/employee/borrowings/create')
-            ->assertOk()
-            ->assertSee('Pilih member')
-            ->assertSee('Pilih buku')
-            ->assertSee('Periode (hari)');
-
-        $this->actingAs($employee)->get('/employee/returns/create')
-            ->assertOk()
-            ->assertSee('Belum ada data.');
 
         $this->actingAs($employee)->get('/employee/borrowings/history')
             ->assertOk()
-            ->assertSee('Peminjam')
-            ->assertSee('Belum ada data.');
+            ->assertSee('Borrower')
+            ->assertSee('No data yet.')
+            ->assertSee('+ New Borrowing');
 
         $this->actingAs($employee)->get('/employee/members')
             ->assertOk()
-            ->assertSee('Pinjaman aktif');
+            ->assertSee('Active Borrowings');
     }
 
     public function test_member_pages_render_with_status_filter(): void
@@ -79,9 +69,9 @@ class ViewsSmokeTest extends TestCase
 
         $this->actingAs($member)->get('/member/books')
             ->assertOk()
-            ->assertSee('Koleksi Buku')
-            ->assertSee('Pinjaman Saya')
-            ->assertSee('Semua')
+            ->assertSee('Book Collection')
+            ->assertSee('My Borrowings')
+            ->assertSee('All')
             ->assertSee('Available Book')
             ->assertSee('Borrowed Book');
 
@@ -97,8 +87,8 @@ class ViewsSmokeTest extends TestCase
 
         $this->actingAs($member)->get('/member/borrowings')
             ->assertOk()
-            ->assertSee('Sedang Dipinjam')
-            ->assertSee('Sudah Dikembalikan')
-            ->assertSee('Belum ada data.');
+            ->assertSee('Currently Borrowed')
+            ->assertSee('Returned')
+            ->assertSee('No data yet.');
     }
 }

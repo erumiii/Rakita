@@ -10,14 +10,14 @@ if (! function_exists('format_dt')) {
 }
 
 if (! function_exists('borrow_reminder')) {
-    /** "2 hari lagi" | "Hari ini" | "Terlambat 1 hari" */
+    /** "2 days left" | "Today" | "1 day overdue" */
     function borrow_reminder(\Illuminate\Support\Carbon $due): string
     {
         $diffDays = now()->startOfDay()->diffInDays($due->startOfDay(), false);
         return match (true) {
-            $diffDays < 0 => 'Terlambat '.abs($diffDays).' hari',
-            $diffDays == 0 => 'Hari ini',
-            default => $diffDays.' hari lagi',
+            $diffDays < 0 => 'Overdue by '.abs($diffDays).' day'.(abs($diffDays) > 1 ? 's' : ''),
+            $diffDays == 0 => 'Due today',
+            default => $diffDays.' day'.($diffDays > 1 ? 's' : '').' left',
         };
     }
 }

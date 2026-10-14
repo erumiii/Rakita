@@ -16,9 +16,9 @@ class BookFactory extends Factory
         $i++;
 
         return [
-            'title' => "Sample Book {$i}",
-            'author' => "Author {$i}",
-            'publisher' => "Publisher {$i}",
+            'title' => sprintf('Sample Book %02d', $i),
+            'author' => sprintf('Author %02d', $i),
+            'publisher' => sprintf('Publisher %02d', $i),
             'page' => 100 + $i,
             'isbn' => sprintf('978-00000000%02d', $i),
         ];

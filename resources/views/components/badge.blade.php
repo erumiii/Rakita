@@ -7,5 +7,12 @@
     'overdue' => 'bg-ink text-white',
     'returned' => 'bg-sidebar text-ink',
 ])
+@php($labels = [
+    'isAvailable' => 'Available',
+    'isBorrowed' => 'Borrowed',
+    'borrowed' => 'Borrowed',
+    'overdue' => 'Overdue',
+    'returned' => 'Returned',
+])
 <span {{ $attributes->merge(['class' => 'inline-flex items-center rounded-full border px-3 py-0.5 text-hint '.($map[$status] ?? 'border-line-input bg-white text-ink')]) }}
-      data-status="{{ $status }}">{{ $status }}</span>
+      data-status="{{ $status }}">{{ $labels[$status] ?? $status }}</span>

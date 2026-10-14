@@ -31,29 +31,24 @@ class BookController extends Controller
     {
         Book::create($request->validated());
 
-        return redirect('/employee/books')->with('success', 'Buku ditambahkan.');
-    }
-
-    public function edit(Book $book)
-    {
-        return view('employee.books.edit', compact('book'));
+        return redirect('/employee/books')->with('success', 'Book added.');
     }
 
     public function update(UpdateBookRequest $request, Book $book)
     {
         $book->update($request->validated());
 
-        return redirect('/employee/books')->with('success', 'Buku diperbarui.');
+        return redirect('/employee/books')->with('success', 'Book updated.');
     }
 
     public function destroy(Book $book)
     {
         if ($book->activeBorrowing()->exists()) {
-            return back()->withErrors(['delete' => 'Buku sedang dipinjam dan tidak dapat dihapus.']);
+            return back()->withErrors(['delete' => 'This book is currently borrowed and cannot be deleted.']);
         }
 
         $book->delete();
 
-        return redirect('/employee/books')->with('success', 'Buku dihapus.');
+        return redirect('/employee/books')->with('success', 'Book deleted.');
     }
 }

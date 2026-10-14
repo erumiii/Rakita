@@ -24,16 +24,13 @@ Route::get('/', function () {
 })->middleware('auth');
 
 Route::middleware(['auth', 'dbsession', 'role:employee'])->prefix('employee')->name('employee.')->group(function () {
-    Route::resource('books', BookController::class)->except(['show']);
+    Route::resource('books', BookController::class)->except(['show', 'create', 'edit']);
 
-    Route::get('/borrowings/create', [BorrowController::class, 'create'])->name('borrowings.create');
-    Route::post('/borrowings', [BorrowController::class, 'store'])->name('borrowings.store');
     Route::get('/borrowings/history', [HistoryController::class, 'index'])->name('borrowings.history');
-    Route::get('/returns/create', [ReturnController::class, 'create'])->name('returns.create');
+    Route::post('/borrowings', [BorrowController::class, 'store'])->name('borrowings.store');
     Route::post('/returns', [ReturnController::class, 'store'])->name('returns.store');
 
     Route::get('/members', [MemberController::class, 'index'])->name('members.index');
-    Route::get('/members/{member}/edit', [MemberController::class, 'edit'])->name('members.edit');
     Route::put('/members/{member}', [MemberController::class, 'update'])->name('members.update');
 });
 

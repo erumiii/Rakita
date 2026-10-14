@@ -48,7 +48,7 @@ class EmployeeMembersTest extends TestCase
         $this->from('/login')
             ->post('/login', ['username' => $member->username, 'password' => 'password'])
             ->assertRedirect('/login')
-            ->assertSessionHasErrors(['username' => 'Akun dinonaktifkan.']);
+            ->assertSessionHasErrors(['username' => 'This account has been deactivated.']);
     }
 
     public function test_updates_member_name(): void
@@ -82,11 +82,10 @@ class EmployeeMembersTest extends TestCase
         $this->assertTrue(Hash::check('newpassword', $member->password));
     }
 
-    public function test_member_cannot_access_member_edit_routes(): void
+    public function test_member_cannot_update_member(): void
     {
         $member = User::factory()->member()->create();
 
-        $this->actingAs($member)->get("/employee/members/{$member->id}/edit")->assertForbidden();
         $this->actingAs($member)->put("/employee/members/{$member->id}", [
             'name' => 'x', 'password' => '', 'is_active' => '1',
         ])->assertForbidden();

@@ -4,8 +4,6 @@
 
 | Atribut        | Detail                          |
 | -------------- | ------------------------------- |
-| **Versi**      | 1.0 (Draft)                     |
-| **Tanggal**    | 14 Oktober 2026                 |
 | **Tech Stack** | Laravel, PostgreSQL             |
 | **Status**     | Draft untuk review              |
 

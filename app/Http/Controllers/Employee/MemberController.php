@@ -20,13 +20,6 @@ class MemberController extends Controller
         return view('employee.members.index', compact('members'));
     }
 
-    public function edit(User $member)
-    {
-        abort_unless($member->role === 'member', 404);
-
-        return view('employee.members.edit', compact('member'));
-    }
-
     public function update(UpdateMemberRequest $request, User $member)
     {
         abort_unless($member->role === 'member', 404);
@@ -40,6 +33,6 @@ class MemberController extends Controller
 
         $member->update($data);
 
-        return redirect('/employee/members')->with('success', 'Member diperbarui.');
+        return redirect('/employee/members')->with('success', 'Member updated.');
     }
 }

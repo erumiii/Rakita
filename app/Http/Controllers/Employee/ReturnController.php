@@ -10,13 +10,6 @@ use Illuminate\Support\Carbon;
 
 class ReturnController extends Controller
 {
-    public function create()
-    {
-        return view('employee.returns.create', [
-            'borrowings' => Borrowing::active()->with(['book', 'member'])->orderBy('due_at')->get(),
-        ]);
-    }
-
     public function store(StoreReturnRequest $request, BorrowingService $service)
     {
         $borrowing = Borrowing::findOrFail($request->borrowing_id);
@@ -27,6 +20,6 @@ class ReturnController extends Controller
             return back()->withErrors(['borrowing_id' => $e->getMessage()]);
         }
 
-        return redirect()->route('employee.borrowings.history')->with('success', 'Pengembalian dicatat.');
+        return redirect()->route('employee.borrowings.history')->with('success', 'Return recorded.');
     }
 }

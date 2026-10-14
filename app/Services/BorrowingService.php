@@ -19,7 +19,7 @@ class BorrowingService
             $book = Book::whereKey($book->id)->lockForUpdate()->first();
 
             if ($book->status !== 'isAvailable') {
-                throw new \RuntimeException('Buku sedang dipinjam.');
+                throw new \RuntimeException('This book is currently borrowed.');
             }
 
             // ponytail: member-row lock backstops the cap race — the unique index
@@ -28,7 +28,7 @@ class BorrowingService
 
             $activeCount = Borrowing::where('member_id', $member->id)->active()->count();
             if ($activeCount >= self::MAX_ACTIVE) {
-                throw new \RuntimeException('Member sudah meminjam 3 buku.');
+                throw new \RuntimeException('Member already has 3 active borrowings.');
             }
 
             $at ??= now();
@@ -55,7 +55,7 @@ class BorrowingService
             $borrowing = Borrowing::whereKey($borrowing->id)->lockForUpdate()->first();
 
             if ($borrowing->returned_at !== null) {
-                throw new \RuntimeException('Peminjaman sudah dikembalikan.');
+                throw new \RuntimeException('This borrowing has already been returned.');
             }
 
             $at ??= now();

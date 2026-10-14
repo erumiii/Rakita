@@ -80,7 +80,7 @@ class MemberPortalTest extends TestCase
 
         $response->assertOk();
         $response->assertSee($mine->book->title);
-        $response->assertSee('>2 hari lagi<', false);
+        $response->assertSee('>2 days left<', false);
         $response->assertSee($returned->book->title); // returned section below
         $response->assertDontSee($othersTitle);
     }
@@ -96,7 +96,7 @@ class MemberPortalTest extends TestCase
         $response = $this->actingAs($member)->get('/member/borrowings');
 
         $response->assertOk();
-        $response->assertSee('>Terlambat 3 hari<', false);
+        $response->assertSee('>Overdue by 3 days<', false);
         $response->assertSee('overdue', false);
     }
 
@@ -153,11 +153,11 @@ class MemberPortalTest extends TestCase
         $this->actingAs($employee)->get('/employee/borrowings/history')
             ->assertOk()
             ->assertSee($returned->book->title)
-            ->assertSee('(dihapus)');
+            ->assertSee('(deleted)');
 
         $this->actingAs($member)->get('/member/borrowings')
             ->assertOk()
             ->assertSee($returned->book->title)
-            ->assertSee('(dihapus)');
+            ->assertSee('(deleted)');
     }
 }
