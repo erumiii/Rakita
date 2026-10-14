@@ -15,8 +15,9 @@ abstract class TestCase extends BaseTestCase
         $this->beforeApplicationDestroyed(function () {
             try {
                 DB::select('TRUNCATE books, borrowings, users RESTART IDENTITY CASCADE');
-            } catch (\Throwable) {
-                // DB may be unavailable late in shutdown; nothing to clean then.
+            } catch (\Throwable $e) {
+                // DB may be unavailable late in shutdown; log so cleanup bugs stay visible.
+                logger()->warning('TestCase TRUNCATE cleanup skipped: ' . $e->getMessage());
             }
         });
 

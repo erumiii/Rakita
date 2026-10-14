@@ -15,12 +15,16 @@ class BorrowingService
 
     public function borrow(Book $book, User $member, int $days, ?Carbon $at = null): Borrowing
     {
-        return DB::transaction(function () use ($book, $member, $days, $at) {
+        return DB::connection('pgsql_app')->transaction(function () use ($book, $member, $days, $at) {
             $book = Book::whereKey($book->id)->lockForUpdate()->first();
 
             if ($book->status !== 'isAvailable') {
                 throw new \RuntimeException('Buku sedang dipinjam.');
             }
+
+            // ponytail: member-row lock backstops the cap race — the unique index
+            // guards book_id only; raise it to a member_id index if caps tighten.
+            User::on('pgsql_app')->whereKey($member->id)->lockForUpdate()->first();
 
             $activeCount = Borrowing::where('member_id', $member->id)->active()->count();
             if ($activeCount >= self::MAX_ACTIVE) {
@@ -47,7 +51,7 @@ class BorrowingService
 
     public function return(Borrowing $borrowing, ?Carbon $at = null): Borrowing
     {
-        return DB::transaction(function () use ($borrowing, $at) {
+        return DB::connection('pgsql_app')->transaction(function () use ($borrowing, $at) {
             $borrowing = Borrowing::whereKey($borrowing->id)->lockForUpdate()->first();
 
             if ($borrowing->returned_at !== null) {

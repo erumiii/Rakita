@@ -15,7 +15,7 @@ class StoreBorrowingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'member_id' => ['required', Rule::exists('users', 'id')->where('role', 'member')],
+            'member_id' => ['required', Rule::exists('users', 'id')->where('role', 'member')->where('is_active', true)],
             'book_id' => ['required', 'exists:books,id'],
             'borrowed_at' => ['required', 'date'],
             'borrow_period_days' => ['required', 'integer', 'min:1', 'max:7'],

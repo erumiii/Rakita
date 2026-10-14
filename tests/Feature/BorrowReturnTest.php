@@ -140,6 +140,38 @@ class BorrowReturnTest extends TestCase
         $this->assertSame(1, Borrowing::count());
     }
 
+    public function test_unique_index_rejects_second_active_borrow_same_book(): void
+    {
+        $employee = User::factory()->employee()->create();
+        $member = User::factory()->member()->create();
+        $book = Book::factory()->create();
+
+        \App\Support\DbSession::apply($employee);
+        Borrowing::create([
+            'book_id' => $book->id,
+            'member_id' => $member->id,
+            'processed_by' => $employee->id,
+            'borrowed_at' => now(),
+            'borrow_period_days' => 7,
+            'due_at' => now()->addDays(7),
+            'status' => 'borrowed',
+        ]);
+
+        // Bypass the service status check: same book, different member, still
+        // active — only the partial unique index can reject this insert.
+        $otherMember = User::factory()->member()->create();
+        $this->expectException(\Illuminate\Database\UniqueConstraintViolationException::class);
+        Borrowing::create([
+            'book_id' => $book->id,
+            'member_id' => $otherMember->id,
+            'processed_by' => $employee->id,
+            'borrowed_at' => now(),
+            'borrow_period_days' => 7,
+            'due_at' => now()->addDays(7),
+            'status' => 'borrowed',
+        ]);
+    }
+
     public function test_delete_blocked_while_book_borrowed(): void
     {
         $employee = User::factory()->employee()->create();
