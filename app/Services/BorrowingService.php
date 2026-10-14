@@ -28,7 +28,6 @@ class BorrowingService
             }
 
             $at ??= now();
-            $at = Carbon::parse($at);
 
             $borrowing = Borrowing::create([
                 'book_id' => $book->id,
