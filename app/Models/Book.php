@@ -11,7 +11,10 @@ class Book extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['title', 'author', 'publisher', 'page', 'isbn'];
+    // Runtime queries run as library_app so RLS is live (DbSession sets context here).
+    protected $connection = 'pgsql_app';
+
+    protected $fillable = ['title', 'author', 'publisher', 'page', 'isbn', 'status'];
 
     public function activeBorrowing(): HasOne
     {

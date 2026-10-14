@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Borrowing extends Model
 {
+    // Runtime queries run as library_app so RLS is live (DbSession sets context here).
+    protected $connection = 'pgsql_app';
+
     protected $fillable = ['book_id', 'member_id', 'processed_by', 'borrowed_at', 'borrow_period_days', 'due_at', 'returned_at', 'status'];
 
     protected $casts = [

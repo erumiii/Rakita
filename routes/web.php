@@ -16,8 +16,13 @@ Route::get('/', function () {
     return auth()->user()->role === 'employee' ? redirect('/employee/books') : redirect('/member/books');
 })->middleware('auth');
 
-// ponytail: placeholder targets for role redirect; Task 3 replaces with BookController
-Route::middleware('auth')->group(function () {
-    Route::get('/member/books', fn () => 'member books');
-    Route::get('/employee/books', fn () => 'employee books');
+use App\Http\Controllers\Employee\BookController;
+
+Route::middleware(['auth', 'dbsession', 'role:employee'])->prefix('employee')->name('employee.')->group(function () {
+    Route::resource('books', BookController::class)->except(['show']);
+});
+
+Route::middleware(['auth', 'dbsession', 'role:member'])->prefix('member')->name('member.')->group(function () {
+    // ponytail: placeholder replaced in Task 8
+    Route::get('/books', fn () => 'TODO-member-books');
 });
