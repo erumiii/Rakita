@@ -11,7 +11,7 @@ $nav = [
 <x-layout title="Books" subtitle="Kelola koleksi buku perpustakaan" :nav="$nav">
     <div class="mb-6 flex items-center justify-between">
         <form method="GET" action="{{ route('employee.books.index') }}" class="flex items-end gap-3">
-            <x-input name="q" label="Search" placeholder="Title, author, or ISBN" />
+            <x-input name="q" label="Search" placeholder="Title, author, or ISBN" :value="request('q')" />
             <div class="flex flex-col gap-2">
                 <label for="status" class="text-base text-ink">Status</label>
                 <select name="status" id="status"

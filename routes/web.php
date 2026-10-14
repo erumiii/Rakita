@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Employee\BookController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -15,8 +16,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::get('/', function () {
     return auth()->user()->role === 'employee' ? redirect('/employee/books') : redirect('/member/books');
 })->middleware('auth');
-
-use App\Http\Controllers\Employee\BookController;
 
 Route::middleware(['auth', 'dbsession', 'role:employee'])->prefix('employee')->name('employee.')->group(function () {
     Route::resource('books', BookController::class)->except(['show']);
