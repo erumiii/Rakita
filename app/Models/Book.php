@@ -31,6 +31,9 @@ class Book extends Model
 
     public function scopeStatus($query, ?string $status)
     {
-        return $status ? $query->where('status', $status) : $query;
+        // Whitelist — arbitrary ?status= input must not become a WHERE clause value.
+        return in_array($status, ['isAvailable', 'isBorrowed'], true)
+            ? $query->where('status', $status)
+            : $query;
     }
 }

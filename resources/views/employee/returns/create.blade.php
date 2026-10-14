@@ -39,7 +39,12 @@ $nav = [
                 @endforelse
             </tbody>
         </table>
-        <div class="mt-8 flex gap-3">
+        <div class="mt-8 flex items-end gap-3">
+            <div>
+                <label for="returned_at" class="mb-1 block text-group text-ink-muted">Tgl Kembali</label>
+                <input type="datetime-local" name="returned_at" id="returned_at" value="{{ old('returned_at', now()->format('Y-m-d\TH:i')) }}"
+                       class="h-10 rounded-lg border border-line px-3">
+            </div>
             <button type="submit" class="h-10 rounded-lg bg-ink px-4 text-base text-white hover:opacity-90">Catat pengembalian</button>
         </div>
     </form>

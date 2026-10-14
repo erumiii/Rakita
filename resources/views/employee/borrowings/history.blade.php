@@ -24,7 +24,7 @@ $nav = [
             @forelse ($borrowings as $borrowing)
                 <tr class="border-b border-line">
                     <td class="py-3 pr-4">{{ $borrowing->member->name }}</td>
-                    <td class="py-3 pr-4">{{ $borrowing->book->title }} — {{ $borrowing->book->author }} — {{ $borrowing->book->publisher }}</td
+                    <td class="py-3 pr-4">{{ $borrowing->book->title }} — {{ $borrowing->book->author }} — {{ $borrowing->book->publisher }} @if($borrowing->book->trashed()) <span class="text-ink-secondary">(dihapus)</span> @endif</td
                     >
                     <td class="py-3 pr-4">{{ $borrowing->borrow_period_days }} hari</td>
                     <td class="py-3 pr-4">{{ format_dt($borrowing->borrowed_at) }}</td>

@@ -61,7 +61,10 @@ return new class extends Migration
                 OR current_setting('app.current_role', true) = 'employee'
             )
             WITH CHECK (
-                id = NULLIF(current_setting('app.current_user_id', true), '')::bigint
+                -- member's new row must stay role='member' (no self-promotion);
+                -- employee branch is unconstrained
+                (id = NULLIF(current_setting('app.current_user_id', true), '')::bigint
+                    AND role = 'member')
                 OR current_setting('app.current_role', true) = 'employee'
             )");
     }

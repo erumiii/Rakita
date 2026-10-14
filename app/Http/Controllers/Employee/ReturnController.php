@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReturnRequest;
 use App\Models\Borrowing;
 use App\Services\BorrowingService;
+use Illuminate\Support\Carbon;
 
 class ReturnController extends Controller
 {
@@ -21,7 +22,7 @@ class ReturnController extends Controller
         $borrowing = Borrowing::findOrFail($request->borrowing_id);
 
         try {
-            $service->return($borrowing);
+            $service->return($borrowing, $request->filled('returned_at') ? Carbon::parse($request->returned_at) : null);
         } catch (\RuntimeException $e) {
             return back()->withErrors(['borrowing_id' => $e->getMessage()]);
         }

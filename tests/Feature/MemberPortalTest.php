@@ -139,4 +139,25 @@ class MemberPortalTest extends TestCase
             ->assertSee($member->name)
             ->assertSee('overdue', false);
     }
+
+    public function test_employee_history_and_member_list_render_soft_deleted_book(): void
+    {
+        $member = User::factory()->member()->create();
+        $returned = $this->makeBorrowing($member, [
+            'returned_at' => now(),
+            'status' => 'returned',
+        ]);
+        $returned->book->delete();
+
+        $employee = User::where('username', 'library')->first();
+        $this->actingAs($employee)->get('/employee/borrowings/history')
+            ->assertOk()
+            ->assertSee($returned->book->title)
+            ->assertSee('(dihapus)');
+
+        $this->actingAs($member)->get('/member/borrowings')
+            ->assertOk()
+            ->assertSee($returned->book->title)
+            ->assertSee('(dihapus)');
+    }
 }

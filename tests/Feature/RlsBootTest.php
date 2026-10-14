@@ -68,4 +68,33 @@ class RlsBootTest extends TestCase
             (int) DB::connection('pgsql_app')->select('select count(*) as c from borrowings')[0]->c
         );
     }
+
+    public function test_member_context_cannot_escalate_own_role_via_update(): void
+    {
+        $member = User::factory()->member()->create();
+        DbSession::apply($member);
+
+        // Same-role update (own profile) still allowed.
+        $affected = DB::connection('pgsql_app')->update(
+            'update users set name = ? where id = ?', ['Hacked Name', $member->id]
+        );
+        $this->assertSame(1, $affected);
+
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        DB::connection('pgsql_app')->update(
+            'update users set role = ? where id = ?', ['employee', $member->id]
+        );
+    }
+
+    public function test_employee_context_still_updates_any_user_row(): void
+    {
+        $member = User::factory()->member()->create();
+        $employee = User::where('username', 'library')->first();
+        DbSession::apply($employee);
+
+        $affected = DB::connection('pgsql_app')->update(
+            'update users set role = ? where id = ?', ['member', $member->id]
+        );
+        $this->assertSame(1, $affected);
+    }
 }

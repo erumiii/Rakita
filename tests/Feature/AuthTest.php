@@ -92,6 +92,26 @@ class AuthTest extends TestCase
         ])->assertSessionHasErrors('username');
     }
 
+    public function test_rate_limits_register_to_6_attempts_per_minute(): void
+    {
+        // Invalid payloads keep the user guest — 'guest' middleware runs before
+        // 'throttle' and would short-circuit authenticated requests with 302.
+        foreach (range(1, 6) as $i) {
+            $this->post('/register', [
+                'name' => "U{$i}",
+                'username' => "user{$i}",
+                'password' => 'password',
+            ]);
+        }
+
+        $this->post('/register', [
+            'name' => 'U7',
+            'username' => 'user7',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertStatus(429);
+    }
+
     public function test_logout_redirects_to_login_and_guests_user(): void
     {
         $user = User::factory()->create();

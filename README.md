@@ -15,7 +15,7 @@ composer install
 npm install
 cp .env.example .env        # sensible defaults already filled in
 php artisan key:generate
-php artisan migrate --seed  # creates books table... and seeds the employee account
+php artisan migrate --seed  # creates the schema and seeds the employee account
 npm run build
 php artisan serve           # http://localhost:8000
 ```

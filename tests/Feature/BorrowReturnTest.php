@@ -123,6 +123,41 @@ class BorrowReturnTest extends TestCase
         $this->assertSame('isAvailable', $book->refresh()->status);
     }
 
+    public function test_return_records_explicit_past_return_time(): void
+    {
+        $employee = User::factory()->employee()->create();
+        $member = User::factory()->member()->create();
+        $book = Book::factory()->create();
+
+        $this->actingAs($employee)->post('/employee/borrowings', $this->borrowData($member->id, $book->id))
+            ->assertRedirect('/employee/borrowings/history');
+
+        $this->actingAs($employee)->post('/employee/returns', [
+            'borrowing_id' => Borrowing::first()->id,
+            'returned_at' => '2026-10-13T09:30',
+        ])->assertRedirect('/employee/borrowings/history');
+
+        $b = Borrowing::first();
+        $this->assertTrue($b->returned_at->equalTo(\Illuminate\Support\Carbon::parse('2026-10-13 09:30', 'Asia/Jakarta')));
+    }
+
+    public function test_return_rejects_future_return_time(): void
+    {
+        $employee = User::factory()->employee()->create();
+        $member = User::factory()->member()->create();
+        $book = Book::factory()->create();
+
+        $this->actingAs($employee)->post('/employee/borrowings', $this->borrowData($member->id, $book->id))
+            ->assertRedirect('/employee/borrowings/history');
+
+        $this->actingAs($employee)->post('/employee/returns', [
+            'borrowing_id' => Borrowing::first()->id,
+            'returned_at' => now()->addDay()->format('Y-m-d\TH:i'),
+        ])->assertSessionHasErrors('returned_at');
+
+        $this->assertNull(Borrowing::first()->returned_at);
+    }
+
     public function test_double_borrow_race_exactly_one_succeeds(): void
     {
         $employee = User::factory()->employee()->create();

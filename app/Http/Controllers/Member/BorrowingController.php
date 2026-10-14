@@ -10,13 +10,13 @@ class BorrowingController extends Controller
     public function index(Request $request)
     {
         $active = $request->user()->borrowings()
-            ->with('book')
+            ->with(['book' => fn ($q) => $q->withTrashed()])
             ->active()
             ->orderBy('due_at')
             ->get();
 
         $returned = $request->user()->borrowings()
-            ->with('book')
+            ->with(['book' => fn ($q) => $q->withTrashed()])
             ->where('status', 'returned')
             ->orderByDesc('returned_at')
             ->take(10)

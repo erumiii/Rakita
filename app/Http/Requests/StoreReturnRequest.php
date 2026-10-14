@@ -15,6 +15,7 @@ class StoreReturnRequest extends FormRequest
     {
         return [
             'borrowing_id' => ['required', 'exists:borrowings,id'],
+            'returned_at' => ['nullable', 'date', 'before_or_equal:now'],
         ];
     }
 }

@@ -81,4 +81,16 @@ class EmployeeBooksTest extends TestCase
         $this->actingAs($employee)->get('/employee/books?status=isBorrowed')
             ->assertOk()->assertSee('PHP Basics')->assertDontSee('Laravel Deep Dive');
     }
+
+    public function test_status_filter_whitelist_passes_garbage_through_unfiltered(): void
+    {
+        $employee = User::factory()->employee()->create();
+        Book::factory()->create(['title' => 'Available Book', 'status' => 'isAvailable']);
+        Book::factory()->create(['title' => 'Borrowed Book', 'status' => 'isBorrowed']);
+
+        $this->actingAs($employee)->get('/employee/books?status=garbage')
+            ->assertOk()
+            ->assertSee('Available Book')
+            ->assertSee('Borrowed Book');
+    }
 }
