@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Borrowing extends Model
 {
+    use HasFactory;
     // Runtime queries run as library_app so RLS is live (DbSession sets context here).
     protected $connection = 'pgsql_app';
 

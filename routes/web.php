@@ -6,6 +6,8 @@ use App\Http\Controllers\Employee\BorrowController;
 use App\Http\Controllers\Employee\HistoryController;
 use App\Http\Controllers\Employee\MemberController;
 use App\Http\Controllers\Employee\ReturnController;
+use App\Http\Controllers\Member\BookController as MemberBookController;
+use App\Http\Controllers\Member\BorrowingController as MemberBorrowingController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -36,6 +38,7 @@ Route::middleware(['auth', 'dbsession', 'role:employee'])->prefix('employee')->n
 });
 
 Route::middleware(['auth', 'dbsession', 'role:member'])->prefix('member')->name('member.')->group(function () {
-    // ponytail: placeholder replaced in Task 8
-    Route::get('/books', fn () => 'TODO-member-books');
+    Route::get('/books', [MemberBookController::class, 'index'])->name('books.index');
+    Route::get('/books/{book}', [MemberBookController::class, 'show'])->name('books.show');
+    Route::get('/borrowings', [MemberBorrowingController::class, 'index'])->name('borrowings.index');
 });
