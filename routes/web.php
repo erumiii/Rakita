@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Employee\BookController;
+use App\Http\Controllers\Employee\BorrowController;
+use App\Http\Controllers\Employee\HistoryController;
+use App\Http\Controllers\Employee\ReturnController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -19,6 +22,12 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'dbsession', 'role:employee'])->prefix('employee')->name('employee.')->group(function () {
     Route::resource('books', BookController::class)->except(['show']);
+
+    Route::get('/borrowings/create', [BorrowController::class, 'create'])->name('borrowings.create');
+    Route::post('/borrowings', [BorrowController::class, 'store'])->name('borrowings.store');
+    Route::get('/borrowings/history', [HistoryController::class, 'index'])->name('borrowings.history');
+    Route::get('/returns/create', [ReturnController::class, 'create'])->name('returns.create');
+    Route::post('/returns', [ReturnController::class, 'store'])->name('returns.store');
 });
 
 Route::middleware(['auth', 'dbsession', 'role:member'])->prefix('member')->name('member.')->group(function () {

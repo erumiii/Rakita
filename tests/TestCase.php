@@ -14,7 +14,7 @@ abstract class TestCase extends BaseTestCase
         // after RefreshDatabase's rollback callback has run.
         $this->beforeApplicationDestroyed(function () {
             try {
-                DB::select('TRUNCATE books, borrowings RESTART IDENTITY CASCADE');
+                DB::select('TRUNCATE books, borrowings, users RESTART IDENTITY CASCADE');
             } catch (\Throwable) {
                 // DB may be unavailable late in shutdown; nothing to clean then.
             }
