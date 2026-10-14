@@ -80,7 +80,7 @@ class MemberPortalTest extends TestCase
 
         $response->assertOk();
         $response->assertSee($mine->book->title);
-        $response->assertSee('2 hari lagi');
+        $response->assertSee('>2 hari lagi<', false);
         $response->assertSee($returned->book->title); // returned section below
         $response->assertDontSee($othersTitle);
     }
@@ -96,7 +96,7 @@ class MemberPortalTest extends TestCase
         $response = $this->actingAs($member)->get('/member/borrowings');
 
         $response->assertOk();
-        $response->assertSee('Terlambat 3 hari');
+        $response->assertSee('>Terlambat 3 hari<', false);
         $response->assertSee('overdue', false);
     }
 

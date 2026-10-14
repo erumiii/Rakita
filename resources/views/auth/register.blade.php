@@ -3,36 +3,33 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Register</title>
+    <title>Daftar — Library Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    @vite('resources/css/app.css')
 </head>
-<body>
-    <h1>Daftar</h1>
+<body class="bg-canvas font-sans text-ink antialiased">
+<div class="flex min-h-screen items-center justify-center p-6">
+    <div class="w-full max-w-sm rounded-lg bg-white p-8 shadow-nav">
+        <h1 class="text-title text-ink">Daftar</h1>
+        <p class="mt-1 text-base text-ink-secondary">Buat akun member baru</p>
 
-    @if ($errors->any())
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    @endif
+        <x-errors />
 
-    <form method="POST" action="/register">
-        @csrf
-        <label for="name">Nama</label>
-        <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus>
+        <form method="POST" action="/register" class="mt-6 flex flex-col gap-4">
+            @csrf
+            <x-input name="name" label="Nama" />
+            <x-input name="username" label="Username" />
+            <x-input name="password" label="Password" type="password" :value="''" />
+            <x-input name="password_confirmation" label="Konfirmasi Password" type="password" :value="''" />
+            <button type="submit"
+                    class="h-10 rounded-lg bg-ink px-4 text-base text-white hover:opacity-90">Daftar</button>
+        </form>
 
-        <label for="username">Username</label>
-        <input id="username" name="username" type="text" value="{{ old('username') }}" required>
-
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" required>
-
-        <label for="password_confirmation">Konfirmasi Password</label>
-        <input id="password_confirmation" name="password_confirmation" type="password" required>
-
-        <button type="submit">Daftar</button>
-    </form>
-
-    <p>Sudah punya akun? <a href="/login">Login</a></p>
+        <p class="mt-6 text-base text-ink-secondary">Sudah punya akun? <a href="/login" class="text-ink hover:underline">Masuk</a></p>
+    </div>
+</div>
+@vite('resources/js/app.js')
 </body>
 </html>

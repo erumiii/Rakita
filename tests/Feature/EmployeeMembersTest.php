@@ -48,7 +48,7 @@ class EmployeeMembersTest extends TestCase
         $this->from('/login')
             ->post('/login', ['username' => $member->username, 'password' => 'password'])
             ->assertRedirect('/login')
-            ->assertSessionHasErrors('username');
+            ->assertSessionHasErrors(['username' => 'Akun dinonaktifkan.']);
     }
 
     public function test_updates_member_name(): void

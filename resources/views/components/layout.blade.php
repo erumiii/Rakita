@@ -37,7 +37,12 @@
             <h1 class="text-title text-ink">{{ $title }}</h1>
             @if($subtitle)<p class="mt-1 text-base text-ink-secondary">{{ $subtitle }}</p>@endif
             <hr class="my-6 border-line">
+            @if (session('success'))
+                <p class="mb-6 rounded-lg border border-line-input bg-sidebar px-4 py-3 text-base text-ink">{{ session('success') }}</p>
+            @endif
+            <x-errors />
             {{ $slot }}
+        </main>
         </main>
     </div>
 </div>

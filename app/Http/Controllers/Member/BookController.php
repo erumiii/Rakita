@@ -12,6 +12,7 @@ class BookController extends Controller
     {
         $books = Book::query()
             ->search($request->string('q'))
+            ->status($request->string('status'))
             ->orderBy('title')
             ->paginate(15)
             ->withQueryString();

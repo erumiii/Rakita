@@ -1,7 +1,7 @@
 @php
 $nav = [
-    ['href' => '/member/books', 'label' => 'Book Collection', 'icon' => '📚', 'active' => true],
-    ['href' => '/member/borrowings', 'label' => 'My Borrowed Books', 'icon' => '📖'],
+    ['href' => '/member/books', 'label' => 'Koleksi Buku', 'icon' => '📚', 'active' => true],
+    ['href' => '/member/borrowings', 'label' => 'Pinjaman Saya', 'icon' => '📖'],
 ];
 @endphp
 
@@ -33,5 +33,5 @@ $nav = [
         </div>
     </div>
 
-    <a href="{{ route('member.books.index') }}" class="mt-8 inline-block text-base text-ink-secondary hover:text-ink">← Back to collection</a>
+    <a href="{{ route('member.books.index') }}" class="mt-8 inline-block text-base text-ink-secondary hover:text-ink">← Kembali ke koleksi</a>
 </x-layout>

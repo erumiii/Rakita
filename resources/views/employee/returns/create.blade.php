@@ -1,28 +1,25 @@
 @php
 $nav = [
-    ['href' => '/employee/books', 'label' => 'Books', 'icon' => '📚'],
-    ['href' => '/employee/borrowings/create', 'label' => 'Borrow Book', 'icon' => '📖'],
-    ['href' => '/employee/returns/create', 'label' => 'Return Book', 'icon' => '↩️', 'active' => true],
-    ['href' => '/employee/borrowings/history', 'label' => 'Borrow History', 'icon' => '🕘'],
+    ['href' => '/employee/books', 'label' => 'Buku', 'icon' => '📚'],
+    ['href' => '/employee/borrowings/create', 'label' => 'Peminjaman', 'icon' => '📖'],
+    ['href' => '/employee/returns/create', 'label' => 'Pengembalian', 'icon' => '↩️', 'active' => true],
+    ['href' => '/employee/borrowings/history', 'label' => 'Riwayat', 'icon' => '🕘'],
     ['href' => '/employee/members', 'label' => 'Members', 'icon' => '👥'],
 ];
 @endphp
 
-<x-layout title="Return Book" subtitle="Catat pengembalian buku" :nav="$nav">
+<x-layout title="Pengembalian" subtitle="Catat pengembalian buku" :nav="$nav">
     <form method="POST" action="{{ route('employee.returns.store') }}">
         @csrf
-        @if (session('success'))
-            <p class="mb-4 rounded-lg border border-line-input bg-white px-4 py-2 text-base text-ink">{{ session('success') }}</p>
-        @endif
         <table class="w-full border-collapse text-base">
             <thead>
-                <tr class="border-b border-line text-left">
+                <tr class="border-b border-line text-left text-group text-ink-muted">
                     <th class="py-3 pr-4 font-medium"></th>
-                    <th class="py-3 pr-4 font-medium">Borrower</th>
-                    <th class="py-3 pr-4 font-medium">Book</th>
-                    <th class="py-3 pr-4 font-medium">Borrowed At</th>
-                    <th class="py-3 pr-4 font-medium">Due At</th>
-                    <th class="py-3 font-medium">Reminder</th>
+                    <th class="py-3 pr-4 font-medium">Peminjam</th>
+                    <th class="py-3 pr-4 font-medium">Buku</th>
+                    <th class="py-3 pr-4 font-medium">Tgl Pinjam</th>
+                    <th class="py-3 pr-4 font-medium">Tgl Jatuh Tempo</th>
+                    <th class="py-3 font-medium">Pengingat</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,12 +35,12 @@ $nav = [
                         <td class="py-3">{{ borrow_reminder($borrowing->due_at) }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="py-6 text-center text-ink-secondary">No active borrowings.</td></tr>
+                    <tr><td colspan="6" class="py-6 text-center text-ink-secondary">Belum ada data.</td></tr>
                 @endforelse
             </tbody>
         </table>
         <div class="mt-8 flex gap-3">
-            <button type="submit" class="h-10 rounded-lg bg-brand px-4 text-base text-white hover:opacity-90">Catat pengembalian</button>
+            <button type="submit" class="h-10 rounded-lg bg-ink px-4 text-base text-white hover:opacity-90">Catat pengembalian</button>
         </div>
     </form>
 </x-layout>
