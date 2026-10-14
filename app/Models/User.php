@@ -34,4 +34,14 @@ class User extends Authenticatable
             'is_active' => 'boolean',
         ];
     }
+
+    public function borrowings()
+    {
+        return $this->hasMany(Borrowing::class, 'member_id');
+    }
+
+    public function processedBorrowings()
+    {
+        return $this->hasMany(Borrowing::class, 'processed_by');
+    }
 }
