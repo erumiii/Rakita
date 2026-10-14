@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\DbSession;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class MarkOverdueTest extends TestCase
@@ -23,7 +24,7 @@ class MarkOverdueTest extends TestCase
         $this->seed(DatabaseSeeder::class);
     }
 
-    private function makeBorrowing(array $attrs): Borrowing
+    private function makeBorrowing(array $attrs = []): Borrowing
     {
         $employee = User::factory()->employee()->create();
         DbSession::apply($employee);
@@ -52,37 +53,29 @@ class MarkOverdueTest extends TestCase
 
     public function test_due_not_yet_past_stays_borrowed(): void
     {
-        $employee = User::factory()->employee()->create();
-        DbSession::apply($employee);
-        $user = User::factory()->member()->create();
-        $book = Book::factory()->create();
-        $b = Borrowing::create([
-            'book_id' => $book->id,
-            'member_id' => $user->id,
-            'processed_by' => $employee->id,
-            'borrowed_at' => now(),
-            'borrow_period_days' => 7,
-            // "Due exactly now" can't be raced against PG's now(); one second
-            // future encodes the same strict-< boundary deterministically.
-            'due_at' => now()->addSecond(),
-            'status' => 'borrowed',
-        ]);
+        // ponytail: default timestamp(0) rounds due_at to whole seconds, so
+        // due_at = now() can never equal PG's microsecond transaction_timestamp;
+        // widen in-test to pin exact equality. Move to the migration if
+        // sub-second due_at ever becomes real.
+        DB::statement('ALTER TABLE borrowings ALTER COLUMN due_at TYPE timestamp(6)');
 
-        $this->artisan('borrowings:mark-overdue')->assertSuccessful();
+        $b = $this->makeBorrowing();
+
+        // PG now() is transaction_timestamp: frozen for this tx, and the
+        // command joins it on the default connection, so due_at == the
+        // command's now() exactly — a `<=` implementation would mark overdue.
+        DB::transaction(function () use ($b) {
+            DB::update('UPDATE borrowings SET due_at = now() WHERE id = ?', [$b->id]);
+            $this->artisan('borrowings:mark-overdue')->assertSuccessful();
+        });
 
         $this->assertSame('borrowed', $b->refresh()->status);
     }
 
     public function test_returned_rows_never_touched(): void
     {
-        $employee = User::factory()->employee()->create();
-        DbSession::apply($employee);
-        $b = Borrowing::create([
-            'book_id' => Book::factory()->create()->id,
-            'member_id' => User::factory()->member()->create()->id,
-            'processed_by' => $employee->id,
+        $b = $this->makeBorrowing([
             'borrowed_at' => now()->subDays(10),
-            'borrow_period_days' => 7,
             'due_at' => now()->subDays(3),
             'returned_at' => now()->subDay(),
             'status' => 'returned',

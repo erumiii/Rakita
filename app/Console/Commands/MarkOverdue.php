@@ -12,8 +12,7 @@ class MarkOverdue extends Command
 
     public function handle(): int
     {
-        // Default superuser connection bypasses RLS on purpose: a batch job
-        // must see all rows; the console context has no DbSession GUCs.
+        // Default superuser connection bypasses RLS on purpose: batch job must see all rows.
         $count = DB::update("
             UPDATE borrowings SET status = 'overdue', updated_at = now()
             WHERE status = 'borrowed' AND returned_at IS NULL AND due_at < now()
