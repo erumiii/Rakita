@@ -11,8 +11,7 @@ if ! grep -q '^APP_KEY=.\+' .env; then
     php artisan key:generate --force
 fi
 
-# artisan serve's PHP child processes don't inherit real env vars, so persist
-# the compose-provided DB location into .env as well (idempotent on restart).
+# Persist the compose-provided DB location into .env (idempotent on restart).
 if [ -n "${DB_HOST:-}" ]; then
     sed -i "s/^DB_HOST=.*/DB_HOST=${DB_HOST}/" .env
 fi
@@ -34,6 +33,9 @@ done
 # Seed only while the users table is empty, so restarts stay idempotent.
 php docker/seed_once.php
 
-# Scheduler (borrowings:mark-overdue every minute) + web server.
-php artisan schedule:work &
-exec php artisan serve --host=0.0.0.0 --port=8000 --no-reload
+# No config/route/view caching here: a baked config cache would freeze env
+# values and break phpunit overrides (SESSION_DRIVER etc.), causing CSRF 419s.
+
+# Hand off to the image CMD: "php-fpm" for the app container,
+# "php artisan schedule:work" for the scheduler container.
+exec "$@"

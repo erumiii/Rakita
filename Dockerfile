@@ -27,8 +27,8 @@ COPY . .
 COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
-########## Stage 3: Runtime ##########
-FROM php:8.3-cli-alpine
+########## Stage 3: Runtime (PHP-FPM) ##########
+FROM php:8.3-fpm-alpine
 
 # pdo_pgsql/pgsql for PostgreSQL (libpq stays installed as a runtime lib).
 RUN apk add --no-cache postgresql-libs \
@@ -50,10 +50,8 @@ RUN php artisan package:discover --ansi \
     && chown -R www-data:www-data storage bootstrap/cache \
     && rm -f public/phpinfo-check.php
 
-# Multiple workers for the built-in PHP dev server artisan serve uses.
-ENV PHP_CLI_SERVER_WORKERS=4
-
 USER www-data
-EXPOSE 8000
+EXPOSE 9000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php-fpm"]
