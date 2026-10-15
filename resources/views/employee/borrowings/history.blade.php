@@ -2,6 +2,7 @@
 $nav = [
     ['href' => '/employee/books', 'label' => 'Books', 'icon' => 'books'],
     ['href' => '/employee/borrowings/history', 'label' => 'Borrow', 'icon' => 'book-open', 'active' => true],
+    ['href' => '/employee/reservations', 'label' => 'Reservations', 'icon' => 'clock'],
     ['href' => '/employee/members', 'label' => 'Members', 'icon' => 'users'],
 ];
 @endphp

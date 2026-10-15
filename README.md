@@ -60,6 +60,18 @@ Members self-register at `/register`.
 
 - Max **3** active borrows per member
 - Borrow period **1–7 days**, due date = borrowed_at + period
+- Max **3** pending reservations per member
+- Reservation pickup window **3 days** once the copy is held (FIFO per book)
+
+## Reservations
+
+Members reserve books from the catalog (`/member/books`) and track their queue at `/member/reservations`; employees manage all reservations at `/employee/reservations`.
+
+- Reserving an **available** book with an empty queue → pickup offer immediately (`expires_at` = now + 3 days); a live offer blocks borrowing by other members.
+- Reserving a **borrowed** book → join the FIFO queue (`expires_at` NULL).
+- On **return**, the queue head gets the offer; on **pickup** (employee records the borrow) the reservation becomes `fulfilled`.
+- Scheduled command `reservations:expire` (every minute) expires stale offers and promotes the next in line — it also covers member-side cancellations, since member RLS may not touch other members' rows.
+- RLS: members only see/cancel their own rows; employees see all.
 
 ## Overdue handling
 

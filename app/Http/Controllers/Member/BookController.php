@@ -17,11 +17,24 @@ class BookController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('member.books.index', compact('books'));
+        // Own rows only — RLS-scoped, used to render Reserve button state.
+        $myReservedBookIds = $request->user()->reservations()->pending()->pluck('book_id')->all();
+        $myBorrowedBookIds = $request->user()->borrowings()->active()->pluck('book_id')->all();
+
+        return view('member.books.index', compact('books', 'myReservedBookIds', 'myBorrowedBookIds'));
     }
 
-    public function show(Book $book)
+    public function show(Request $request, Book $book)
     {
-        return view('member.books.show', compact('book'));
+        $myReservation = $request->user()->reservations()
+            ->where('book_id', $book->id)
+            ->pending()
+            ->first();
+        $myActiveBorrow = $request->user()->borrowings()
+            ->where('book_id', $book->id)
+            ->active()
+            ->exists();
+
+        return view('member.books.show', compact('book', 'myReservation', 'myActiveBorrow'));
     }
 }

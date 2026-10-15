@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Book;
 use App\Models\Borrowing;
+use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,19 @@ class BorrowingService
 
             if ($book->status !== 'isAvailable') {
                 throw new \RuntimeException('This book is currently borrowed.');
+            }
+
+            // A live pickup offer (expires_at in the future) holds the copy for
+            // that member only. Queue state is global per book and RLS hides
+            // other members' rows, so read it via the superuser connection.
+            $heldForOther = Reservation::on('pgsql')
+                ->where('book_id', $book->id)
+                ->pending()
+                ->where('expires_at', '>', now())
+                ->where('member_id', '!=', $member->id)
+                ->exists();
+            if ($heldForOther) {
+                throw new \RuntimeException('This book is reserved for another member.');
             }
 
             // ponytail: member-row lock backstops the cap race — the unique index
@@ -45,6 +59,12 @@ class BorrowingService
 
             $book->update(['status' => 'isBorrowed']);
 
+            // Picking up a reserved copy fulfills the member's reservation.
+            Reservation::where('book_id', $book->id)
+                ->where('member_id', $member->id)
+                ->pending()
+                ->update(['status' => 'fulfilled']);
+
             return $borrowing;
         });
     }
@@ -65,6 +85,9 @@ class BorrowingService
             ]);
 
             $borrowing->book->update(['status' => 'isAvailable']);
+
+            // Copy is back — offer it to the head of the reservation queue.
+            (new ReservationService)->promoteNext($borrowing->book->refresh());
 
             return $borrowing;
         });
