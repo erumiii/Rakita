@@ -7,10 +7,30 @@ Small library app: employees manage books, members, borrowing, and returns; memb
 - Laravel 12, Vite, Tailwind
 - PostgreSQL 16 (Docker), two DB roles: `library_postgres` (superuser, migrations/tests) and `library_app` (runtime, RLS applies)
 
-## Setup
+## Quick start (Docker)
 
 ```bash
-docker compose up -d        # Postgres 16 on port 5433 (creates library_app role + library_test DB)
+docker compose up --build   # app on http://localhost:8000, Postgres on localhost:5433
+```
+
+First boot builds the image, waits for Postgres, runs migrations, seeds once
+(employee `library` / `password` + sample books), then serves HTTP and runs the
+scheduler (`schedule:work`) in the app container. Restarts are safe: seeding
+only happens while the `users` table is empty.
+
+```bash
+docker compose exec app php artisan test   # RLS suite (uses library_test)
+docker compose logs -f app
+docker compose down                        # add -v to also wipe the DB volume
+```
+
+`public/phpinfo-check.php` is a local XAMPP diagnostic and is excluded from the
+Docker image.
+
+## Setup (host, without Docker)
+
+```bash
+docker compose up -d db     # Postgres 16 on port 5433 (creates library_app role + library_test DB)
 composer install
 npm install
 cp .env.example .env        # sensible defaults already filled in
