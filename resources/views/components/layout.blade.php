@@ -37,7 +37,9 @@
         </div>
     </aside>
     <div class="flex h-screen flex-1 flex-col overflow-y-auto">
-        <header class="h-16 border-b border-line"></header>
+        <header class="flex h-16 items-center justify-end border-b border-line px-[68px]">
+            <x-notification-bell />
+        </header>
         <main class="flex-1 px-[68px] py-8">
             <h1 class="text-title text-ink">{{ $title }}</h1>
             @if($subtitle)<p class="mt-1 text-base text-ink-secondary">{{ $subtitle }}</p>@endif

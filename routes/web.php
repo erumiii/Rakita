@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Employee\BookController;
 use App\Http\Controllers\Employee\BorrowController;
 use App\Http\Controllers\Employee\HistoryController;
@@ -20,6 +21,11 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+Route::middleware(['auth', 'dbsession'])->group(function () {
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
+});
 
 Route::get('/', function () {
     return auth()->user()->role === 'employee' ? redirect('/employee/books') : redirect('/member/books');

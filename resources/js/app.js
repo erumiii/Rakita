@@ -19,6 +19,24 @@ document.addEventListener('click', (e) => {
     if (dialog && !e.target.closest('[data-modal-frame]')) dialog.close();
 });
 
+// Notification bell: toggle panel, close on outside click / Escape.
+const notificationPanels = () => document.querySelectorAll('[data-notification-panel]');
+
+document.addEventListener('click', (e) => {
+    const toggle = e.target.closest('[data-notification-toggle]');
+    notificationPanels().forEach((panel) => {
+        if (toggle && panel.parentElement === toggle.parentElement) {
+            panel.classList.toggle('hidden');
+        } else if (!toggle && !panel.contains(e.target)) {
+            panel.classList.add('hidden');
+        }
+    });
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') notificationPanels().forEach((p) => p.classList.add('hidden'));
+});
+
 // Reopen the modal whose form just failed validation (server re-render).
 document.querySelectorAll('dialog[data-modal][data-open]').forEach((el) => el.showModal());
 

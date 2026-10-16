@@ -28,11 +28,25 @@ return new class extends Migration
                 user_id = NULLIF(current_setting('app.current_user_id', true), '')::bigint
                 OR (user_id IS NULL AND recipient_role = current_setting('app.current_role', true))
             )");
+
+        // Mark-read only: rows the reader can see, no column restriction (the
+        // model only ever writes read_at).
+        DB::statement("
+            CREATE POLICY notifications_update ON notifications FOR UPDATE
+            USING (
+                user_id = NULLIF(current_setting('app.current_user_id', true), '')::bigint
+                OR (user_id IS NULL AND recipient_role = current_setting('app.current_role', true))
+            )
+            WITH CHECK (
+                user_id = NULLIF(current_setting('app.current_user_id', true), '')::bigint
+                OR (user_id IS NULL AND recipient_role = current_setting('app.current_role', true))
+            )");
     }
 
     public function down(): void
     {
         DB::statement('DROP POLICY IF EXISTS notifications_select ON notifications');
+        DB::statement('DROP POLICY IF EXISTS notifications_update ON notifications');
         DB::statement('ALTER TABLE notifications NO FORCE ROW LEVEL SECURITY');
         DB::statement('ALTER TABLE notifications DISABLE ROW LEVEL SECURITY');
         Schema::connection('pgsql')->dropIfExists('notifications');
