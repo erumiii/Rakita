@@ -22,6 +22,8 @@ class ReservationFactory extends Factory
 
     public function offered(): static
     {
-        return $this->state(fn () => ['expires_at' => now()->addDays(3)]);
+        return $this->state(fn () => ['expires_at' => now()->addDays(
+            \App\Services\ReservationService::PICKUP_DAYS
+        )]);
     }
 }

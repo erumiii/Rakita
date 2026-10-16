@@ -35,7 +35,7 @@ $nav = [
                         <form method="POST" action="{{ route('member.reservations.destroy', $reservation) }}">
                             @csrf
                             @method('DELETE')
-                            <button type="button" data-confirm="Cancel this reservation?"
+                            <button type="button" data-confirm="Cancel your reservation for &quot;{{ $reservation->book->title }}&quot;?" data-confirm-title="Cancel Reservation" data-confirm-action="Yes, cancel"
                                     class="inline-flex h-8 items-center rounded-md border border-line-editor bg-white px-3 text-hint text-ink shadow-nav transition-[background-color,border-color,box-shadow] duration-200 ease-out hover:bg-sidebar">Cancel</button>
                         </form>
                     </td>

@@ -10,7 +10,7 @@ use App\Models\User;
 class ReservationService
 {
     public const MAX_PENDING = 3;
-    public const PICKUP_DAYS = 3;
+    public const PICKUP_DAYS = 1;
 
     public function reserve(Book $book, User $member): Reservation
     {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
 use App\Models\Book;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
@@ -21,7 +22,16 @@ class BookController extends Controller
         $myReservedBookIds = $request->user()->reservations()->pending()->pluck('book_id')->all();
         $myBorrowedBookIds = $request->user()->borrowings()->active()->pluck('book_id')->all();
 
-        return view('member.books.index', compact('books', 'myReservedBookIds', 'myBorrowedBookIds'));
+        // Queue sizes are global per book and RLS hides other members' rows,
+        // so count them via the superuser connection (counts only, no rows).
+        $queueCounts = Reservation::on('pgsql')
+            ->whereIn('book_id', $books->pluck('id'))
+            ->pending()
+            ->selectRaw('book_id, count(*) as aggregate')
+            ->groupBy('book_id')
+            ->pluck('aggregate', 'book_id');
+
+        return view('member.books.index', compact('books', 'myReservedBookIds', 'myBorrowedBookIds', 'queueCounts'));
     }
 
     public function show(Request $request, Book $book)
@@ -34,7 +44,8 @@ class BookController extends Controller
             ->where('book_id', $book->id)
             ->active()
             ->exists();
+        $queueCount = Reservation::on('pgsql')->where('book_id', $book->id)->pending()->count();
 
-        return view('member.books.show', compact('book', 'myReservation', 'myActiveBorrow'));
+        return view('member.books.show', compact('book', 'myReservation', 'myActiveBorrow', 'queueCount'));
     }
 }

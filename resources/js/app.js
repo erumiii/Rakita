@@ -22,8 +22,10 @@ document.addEventListener('click', (e) => {
 // Reopen the modal whose form just failed validation (server re-render).
 document.querySelectorAll('dialog[data-modal][data-open]').forEach((el) => el.showModal());
 
-// Custom delete confirm: [data-confirm] carries the message; the confirm dialog
-// submits the closest form on {data-confirm-submit].
+// Generic confirm: [data-confirm] carries the message (optional
+// data-confirm-title / data-confirm-action override the dialog heading and
+// button label); the dialog submits the trigger's closest form on
+// [data-confirm-submit].
 const confirmDialog = document.getElementById('modal-confirm');
 document.addEventListener('click', (e) => {
     if (confirmDialog) {
@@ -32,6 +34,8 @@ document.addEventListener('click', (e) => {
             e.preventDefault();
             confirmDialog._form = trigger.closest('form');
             confirmDialog.querySelector('[data-confirm-message]').textContent = trigger.getAttribute('data-confirm');
+            confirmDialog.querySelector('[data-confirm-title]').textContent = trigger.getAttribute('data-confirm-title') || 'Confirm';
+            confirmDialog.querySelector('[data-confirm-action]').textContent = trigger.getAttribute('data-confirm-action') || 'Confirm';
             confirmDialog.showModal();
             return;
         }

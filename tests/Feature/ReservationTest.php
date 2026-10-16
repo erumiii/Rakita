@@ -189,6 +189,35 @@ class ReservationTest extends TestCase
         $this->assertNotNull($promoted->expires_at);
     }
 
+    public function test_catalog_confirm_message_ready_for_pickup_on_available_book(): void
+    {
+        $member = User::factory()->member()->create();
+        Book::factory()->create();
+
+        // Available + empty queue: immediate pickup, no queue position shown.
+        $this->actingAs($member)->get('/member/books')
+            ->assertOk()
+            ->assertSee('is ready for pickup')
+            ->assertDontSee('You will be on queue');
+    }
+
+    public function test_catalog_confirm_message_shows_queue_position(): void
+    {
+        $employee = User::factory()->employee()->create();
+        $borrower = User::factory()->member()->create();
+        $first = User::factory()->member()->create();
+        $viewer = User::factory()->member()->create();
+        $book = Book::factory()->create();
+
+        $this->borrowViaEmployee($employee, $borrower, $book);
+        $this->actingAs($first)->post('/member/reservations', ['book_id' => $book->id]);
+
+        // One reservation is queued already, so the viewer would be #2.
+        $this->actingAs($viewer)->get('/member/books')
+            ->assertOk()
+            ->assertSee('You will be on queue: 2');
+    }
+
     public function test_member_can_cancel_own_reservation(): void
     {
         $member = User::factory()->member()->create();

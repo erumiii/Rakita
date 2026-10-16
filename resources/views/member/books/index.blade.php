@@ -53,10 +53,19 @@ $nav = [
                         @if (in_array($book->id, $myReservedBookIds))
                             <x-badge status="pending" />
                         @elseif (! in_array($book->id, $myBorrowedBookIds))
+                            @php
+                            $queue = $queueCounts[$book->id] ?? 0;
+                            $confirmMessage = $book->status === 'isAvailable' && $queue === 0
+                                ? '"'.$book->title.'" is ready for pickup — reserve it now?'
+                                : 'Are you sure you want to reserve "'.$book->title.'"? You will be on queue: '.($queue + 1);
+                            @endphp
                             <form method="POST" action="{{ route('member.reservations.store') }}">
                                 @csrf
                                 <input type="hidden" name="book_id" value="{{ $book->id }}">
-                                <button type="submit"
+                                <button type="button"
+                                        data-confirm="{{ $confirmMessage }}"
+                                        data-confirm-title="Confirm Reservation"
+                                        data-confirm-action="Reserve"
                                         class="inline-flex h-8 items-center rounded-md border border-line-editor bg-white px-3 text-hint text-ink shadow-nav transition-[background-color,border-color,box-shadow] duration-200 ease-out hover:bg-sidebar">Reserve</button>
                             </form>
                         @endif

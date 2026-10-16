@@ -59,7 +59,7 @@ $nav = [
                             <form method="POST" action="{{ route('employee.books.destroy', $book) }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" data-confirm="Delete this book?" title="Delete" aria-label="Delete"
+                                <button type="button" data-confirm="Delete &quot;{{ $book->title }}&quot;?" data-confirm-title="Confirm Delete" data-confirm-action="Delete" title="Delete" aria-label="Delete"
                                         class="inline-flex size-7 items-center justify-center rounded-md border border-line-editor bg-white text-ink shadow-nav transition-[background-color,border-color,box-shadow] duration-200 ease-out hover:bg-sidebar">
                                     <x-icon name="trash" class="size-3.5" />
                                 </button>
