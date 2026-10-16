@@ -61,28 +61,16 @@ class NotificationsRlsTest extends TestCase
         $this->assertSame('member.registered', $rows[0]->type);
     }
 
-    public function test_member_cannot_insert_private_row_for_someone_else(): void
+    public function test_member_cannot_insert_any_notification(): void
     {
+        // Inserts are system-internal (service writes via the superuser conn);
+        // the runtime role must never write notifications directly.
         $member = User::factory()->member()->create();
         $this->actingAs($member)->get('/member/books');
 
         $this->expectException(QueryException::class);
         DB::connection('pgsql_app')->table('notifications')->insert([
-            'user_id' => null, 'recipient_role' => null, 'type' => 'x', 'payload' => '{}', 'created_at' => now(),
+            'user_id' => $member->id, 'recipient_role' => null, 'type' => 'x', 'payload' => '{}', 'created_at' => now(),
         ]);
-    }
-
-    public function test_member_can_insert_employee_targeted_row(): void
-    {
-        $member = User::factory()->member()->create();
-        $this->actingAs($member)->get('/member/books');
-
-        DB::connection('pgsql_app')->table('notifications')->insert([
-            'user_id' => null, 'recipient_role' => 'employee', 'type' => 'reservation.created',
-            'payload' => '{"link":"/employee/reservations"}', 'created_at' => now(),
-        ]);
-
-        $count = DB::connection('pgsql')->table('notifications')->where('type', 'reservation.created')->count();
-        $this->assertSame(1, $count);
     }
 }
