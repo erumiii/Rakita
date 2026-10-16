@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\Reservation;
 use App\Services\ReservationService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
@@ -43,6 +44,12 @@ class ReservationController extends Controller
         } catch (\RuntimeException $e) {
             return back()->withErrors(['book_id' => $e->getMessage()]);
         }
+
+        app(NotificationService::class)->notifyEmployees('reservation.created', [
+            'member' => $request->user()->name,
+            'title' => $book->title,
+            'link' => '/employee/reservations',
+        ]);
 
         return redirect()->route('member.reservations.index')->with('success', 'Reservation placed.');
     }

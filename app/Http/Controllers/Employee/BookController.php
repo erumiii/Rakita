@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
 use App\Models\Book;
+use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
@@ -29,7 +31,13 @@ class BookController extends Controller
 
     public function store(StoreBookRequest $request)
     {
-        Book::create($request->validated());
+        $book = Book::create($request->validated());
+
+        $service = app(NotificationService::class);
+        User::where('role', 'member')->get()->each(fn ($m) => $service->notify($m->id, null, 'book.added', [
+            'title' => $book->title,
+            'link' => '/member/books',
+        ]));
 
         return redirect('/employee/books')->with('success', 'Book added.');
     }

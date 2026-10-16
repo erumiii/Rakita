@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Services\NotificationService;
+use App\Support\DbSession;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -49,6 +51,16 @@ class AuthController extends Controller
         ]);
 
         auth()->login($user);
+
+        // No dbsession middleware ran for this guest request; set the RLS
+        // context explicitly so the notify insert sees a consistent session.
+        DbSession::apply($user);
+
+        app(NotificationService::class)->notifyEmployees('member.registered', [
+            'name' => $request->name,
+            'link' => '/employee/members',
+        ]);
+
         $request->session()->regenerate();
 
         return redirect('/member/books');
