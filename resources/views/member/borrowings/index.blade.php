@@ -2,6 +2,7 @@
 $nav = [
     ['href' => '/member/books', 'label' => 'Book Collection', 'icon' => 'books'],
     ['href' => '/member/borrowings', 'label' => 'My Borrowings', 'icon' => 'book-open', 'active' => true],
+    ['href' => '/member/reservations', 'label' => 'My Reservations', 'icon' => 'clock'],
 ];
 @endphp
 

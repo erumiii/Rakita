@@ -2,6 +2,7 @@
 $nav = [
     ['href' => '/member/books', 'label' => 'Book Collection', 'icon' => 'books', 'active' => true],
     ['href' => '/member/borrowings', 'label' => 'My Borrowings', 'icon' => 'book-open'],
+    ['href' => '/member/reservations', 'label' => 'My Reservations', 'icon' => 'clock'],
 ];
 @endphp
 
@@ -31,6 +32,28 @@ $nav = [
             <p class="text-hint text-ink-secondary">Status</p>
             <p><x-badge :status="$book->status" /></p>
         </div>
+    </div>
+
+    <div class="mt-8 flex items-center gap-4">
+        @if ($myReservation)
+            <x-badge status="pending" />
+            <a href="{{ route('member.reservations.index') }}" class="text-base text-ink-secondary hover:text-ink">View my reservations</a>
+        @elseif (! $myActiveBorrow)
+            @php
+            $confirmMessage = $book->status === 'isAvailable' && $queueCount === 0
+                ? '"'.$book->title.'" is ready for pickup — reserve it now?'
+                : 'Are you sure you want to reserve "'.$book->title.'"? You will be on queue: '.($queueCount + 1);
+            @endphp
+            <form method="POST" action="{{ route('member.reservations.store') }}">
+                @csrf
+                <input type="hidden" name="book_id" value="{{ $book->id }}">
+                <button type="button"
+                        data-confirm="{{ $confirmMessage }}"
+                        data-confirm-title="Confirm Reservation"
+                        data-confirm-action="Reserve"
+                        class="inline-flex h-10 items-center rounded-lg bg-ink px-4 text-base text-white shadow-nav transition-[background-color,border-color,box-shadow,opacity] duration-200 ease-out hover:opacity-90">Reserve this book</button>
+            </form>
+        @endif
     </div>
 
     <a href="{{ route('member.books.index') }}" class="mt-8 inline-block text-base text-ink-secondary hover:text-ink">← Back to collection</a>

@@ -2,6 +2,7 @@
 $nav = [
     ['href' => '/employee/books', 'label' => 'Books', 'icon' => 'books'],
     ['href' => '/employee/borrowings/history', 'label' => 'Borrow', 'icon' => 'book-open', 'active' => true],
+    ['href' => '/employee/reservations', 'label' => 'Reservations', 'icon' => 'clock'],
     ['href' => '/employee/members', 'label' => 'Members', 'icon' => 'users'],
 ];
 @endphp
@@ -116,7 +117,10 @@ $nav = [
             <div class="mt-8 flex justify-end gap-3">
                 <button type="button" data-modal-close
                         class="inline-flex h-10 items-center rounded-lg border border-line-editor bg-white px-4 text-base text-ink shadow-nav transition-[background-color,border-color,box-shadow] duration-200 ease-out hover:bg-sidebar">Cancel</button>
-                <button type="submit"
+                <button type="button"
+                        data-confirm="Record this borrowing?"
+                        data-confirm-title="Confirm Borrowing"
+                        data-confirm-action="Record"
                         class="h-10 rounded-lg bg-ink px-4 text-base text-white shadow-nav transition-[background-color,border-color,box-shadow,opacity] duration-200 ease-out hover:opacity-90">Save</button>
             </div>
         </form>

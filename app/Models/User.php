@@ -47,6 +47,11 @@ class User extends Authenticatable
         return $this->hasMany(Borrowing::class, 'member_id');
     }
 
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'member_id');
+    }
+
     public function processedBorrowings()
     {
         return $this->hasMany(Borrowing::class, 'processed_by');

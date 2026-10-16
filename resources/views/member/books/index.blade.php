@@ -2,6 +2,7 @@
 $nav = [
     ['href' => '/member/books', 'label' => 'Book Collection', 'icon' => 'books', 'active' => true],
     ['href' => '/member/borrowings', 'label' => 'My Borrowings', 'icon' => 'book-open'],
+    ['href' => '/member/reservations', 'label' => 'My Reservations', 'icon' => 'clock'],
 ];
 @endphp
 
@@ -34,6 +35,7 @@ $nav = [
                 <th class="py-3 px-4 font-medium">Pages</th>
                 <th class="py-3 px-4 font-medium">ISBN</th>
                 <th class="py-3 px-4 font-medium">Status</th>
+                <th class="py-3 px-4 font-medium">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -47,9 +49,30 @@ $nav = [
                     <td class="py-3 px-4">{{ $book->page }}</td>
                     <td class="py-3 px-4">{{ $book->isbn }}</td>
                     <td class="py-3 px-4"><x-badge :status="$book->status" /></td>
+                    <td class="py-3 px-4">
+                        @if (in_array($book->id, $myReservedBookIds))
+                            <x-badge status="pending" />
+                        @elseif (! in_array($book->id, $myBorrowedBookIds))
+                            @php
+                            $queue = $queueCounts[$book->id] ?? 0;
+                            $confirmMessage = $book->status === 'isAvailable' && $queue === 0
+                                ? '"'.$book->title.'" is ready for pickup — reserve it now?'
+                                : 'Are you sure you want to reserve "'.$book->title.'"? You will be on queue: '.($queue + 1);
+                            @endphp
+                            <form method="POST" action="{{ route('member.reservations.store') }}">
+                                @csrf
+                                <input type="hidden" name="book_id" value="{{ $book->id }}">
+                                <button type="button"
+                                        data-confirm="{{ $confirmMessage }}"
+                                        data-confirm-title="Confirm Reservation"
+                                        data-confirm-action="Reserve"
+                                        class="inline-flex h-8 items-center rounded-md border border-line-editor bg-white px-3 text-hint text-ink shadow-nav transition-[background-color,border-color,box-shadow] duration-200 ease-out hover:bg-sidebar">Reserve</button>
+                            </form>
+                        @endif
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="py-6 text-center text-ink-secondary">No data yet.</td></tr>
+                <tr><td colspan="7" class="py-6 text-center text-ink-secondary">No data yet.</td></tr>
             @endforelse
         </tbody>
     </table>
