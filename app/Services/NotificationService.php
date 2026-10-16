@@ -39,6 +39,7 @@ class NotificationService
         Borrowing::on('pgsql')
             ->whereNull('returned_at')
             ->whereBetween('due_at', [now()->startOfDay(), now()->addDays(self::DUE_SOON_DAYS)->endOfDay()])
+            ->with(['member', 'book'])
             ->get()
             ->each(fn ($b) => $this->notifyBorrowing($b, 'borrowing.due_soon'));
     }
@@ -48,6 +49,7 @@ class NotificationService
         Borrowing::on('pgsql')
             ->whereNull('returned_at')
             ->where('due_at', '<', now()->startOfDay())
+            ->with(['member', 'book'])
             ->get()
             ->each(fn ($b) => $this->notifyBorrowing($b, 'borrowing.overdue'));
     }
@@ -57,9 +59,8 @@ class NotificationService
         // Live pickup offers live on PENDING rows with a future expires_at —
         // promoteNext()/ExpireReservations never set status 'fulfilled'.
         Reservation::on('pgsql')
-            ->pending()
-            ->whereNotNull('expires_at')
-            ->where('expires_at', '>', now())
+            ->offered()
+            ->with('book')
             ->get()
             ->each(function (Reservation $r) {
                 if ($this->dedupe('reservation.pickup', 'reservation_id', (string) $r->id)) {
@@ -79,19 +80,23 @@ class NotificationService
             return;
         }
 
-        $this->notify($b->member_id, null, $type, [
-            'member' => $b->member->name,
-            'title' => $b->book->title,
-            'link' => '/member/borrowings',
-            'borrowing_id' => (string) $b->id,
-        ]);
+        // One transaction so a partial failure can't strand the pair: dedupe
+        // keys on the borrowing_id, so a missing half would never regenerate.
+        DB::connection('pgsql')->transaction(function () use ($b, $type) {
+            $this->notify($b->member_id, null, $type, [
+                'member' => $b->member->name,
+                'title' => $b->book->title,
+                'link' => '/member/borrowings',
+                'borrowing_id' => (string) $b->id,
+            ]);
 
-        $this->notifyEmployees($type, [
-            'member' => $b->member->name,
-            'title' => $b->book->title,
-            'link' => '/employee/borrowings/history',
-            'borrowing_id' => (string) $b->id,
-        ]);
+            $this->notifyEmployees($type, [
+                'member' => $b->member->name,
+                'title' => $b->book->title,
+                'link' => '/employee/borrowings/history',
+                'borrowing_id' => (string) $b->id,
+            ]);
+        });
     }
 
     /** True when a notification of $type for $key already exists. */

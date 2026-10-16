@@ -21,7 +21,7 @@ class NotificationController extends Controller
 
     public function readAll()
     {
-        Notification::query()->unread()->get()->each(fn ($n) => $n->update(['read_at' => now()]));
+        Notification::query()->unread()->update(['read_at' => now()]);
 
         return back();
     }

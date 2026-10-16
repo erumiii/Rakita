@@ -32,17 +32,17 @@ class Notification extends Model
 
         return match ($this->type) {
             'reservation.created' => $forEmployee
-                ? "{$p['member']} reserved \"{$p['title']}\""
-                : "Your reservation for \"{$p['title']}\" is queued",
-            'member.registered' => "{$p['name']} just registered",
+                ? ($p['member'] ?? '').' reserved "'.($p['title'] ?? '').'"'
+                : "Your reservation for \"".($p['title'] ?? '')."\" is queued",
+            'member.registered' => ($p['name'] ?? '').' just registered',
             'borrowing.due_soon' => $forEmployee
-                ? "Due soon: \"{$p['title']}\" borrowed by {$p['member']}"
-                : "\"{$p['title']}\" is due soon",
+                ? 'Due soon: "'.($p['title'] ?? '').'" borrowed by '.($p['member'] ?? '')
+                : "\"".($p['title'] ?? '')."\" is due soon",
             'borrowing.overdue' => $forEmployee
-                ? "Overdue: \"{$p['title']}\" borrowed by {$p['member']}"
-                : "\"{$p['title']}\" is overdue",
-            'book.added' => "New in collection: \"{$p['title']}\"",
-            'reservation.pickup' => "Pickup window open: \"{$p['title']}\" — pick up within 1 day",
+                ? 'Overdue: "'.($p['title'] ?? '').'" borrowed by '.($p['member'] ?? '')
+                : "\"".($p['title'] ?? '')."\" is overdue",
+            'book.added' => 'New in collection: "'.($p['title'] ?? '').'"',
+            'reservation.pickup' => 'Pickup window open: "'.($p['title'] ?? '').'" — pick up within 1 day',
             default => $this->type,
         };
     }

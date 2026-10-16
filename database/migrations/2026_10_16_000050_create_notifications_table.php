@@ -17,6 +17,11 @@ return new class extends Migration
             $table->jsonb('payload')->default('{}');
             $table->timestamp('read_at')->nullable();
             $table->timestamp('created_at')->nullable();
+
+            // Bell badge counts on every page load; scheduler dedupes on type+payload key.
+            $table->index('user_id');
+            $table->index('created_at');
+            $table->index('type');
         });
 
         DB::statement('ALTER TABLE notifications ENABLE ROW LEVEL SECURITY');
