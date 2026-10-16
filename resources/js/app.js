@@ -25,16 +25,22 @@ const notificationPanels = () => document.querySelectorAll('[data-notification-p
 document.addEventListener('click', (e) => {
     const toggle = e.target.closest('[data-notification-toggle]');
     notificationPanels().forEach((panel) => {
-        if (toggle && panel.parentElement === toggle.parentElement) {
+        const wrap = panel.parentElement;
+        if (toggle && wrap === toggle.parentElement) {
             panel.classList.toggle('hidden');
+            wrap.toggleAttribute('data-open', !panel.classList.contains('hidden'));
         } else if (!toggle && !panel.contains(e.target)) {
             panel.classList.add('hidden');
+            wrap.removeAttribute('data-open');
         }
     });
 });
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') notificationPanels().forEach((p) => p.classList.add('hidden'));
+    if (e.key === 'Escape') notificationPanels().forEach((p) => {
+        p.classList.add('hidden');
+        p.parentElement.removeAttribute('data-open');
+    });
 });
 
 // Reopen the modal whose form just failed validation (server re-render).
