@@ -13,14 +13,15 @@ Small library app: employees manage books, members, borrowing, and returns; memb
 docker compose up --build   # app on http://localhost:8000, Postgres on localhost:5433
 ```
 
-First boot builds the image, waits for Postgres, runs migrations, seeds once
-(employee `library` / `password` + sample books), then serves HTTP and runs the
-scheduler (`schedule:work`) in the app container. Restarts are safe: seeding
-only happens while the `users` table is empty.
+First boot builds the images, waits for Postgres, runs migrations, seeds once
+(employee `library` / `password` + sample books), then starts nginx (port 8000,
+proxying to the PHP-FPM app container) and the scheduler container
+(`schedule:work`). Restarts are safe: seeding only happens while the `users`
+table is empty.
 
 ```bash
 docker compose exec app php artisan test   # RLS suite (uses library_test)
-docker compose logs -f app
+docker compose logs -f nginx app scheduler
 docker compose down                        # add -v to also wipe the DB volume
 ```
 
