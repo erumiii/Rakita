@@ -61,6 +61,20 @@ class ViewsSmokeTest extends TestCase
             ->assertSee('Active Borrowings');
     }
 
+    public function test_notification_bell_renders_on_employee_and_member_pages(): void
+    {
+        $employee = User::factory()->employee()->create();
+        $member = User::factory()->member()->create();
+
+        $this->actingAs($employee)->get('/employee/books')
+            ->assertOk()
+            ->assertSee('data-notification-toggle', false);
+
+        $this->actingAs($member)->get('/member/books')
+            ->assertOk()
+            ->assertSee('data-notification-toggle', false);
+    }
+
     public function test_member_pages_render_with_status_filter(): void
     {
         $member = User::factory()->member()->create();
