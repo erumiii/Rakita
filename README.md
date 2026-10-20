@@ -96,3 +96,18 @@ Requires the Docker DB running; tests use the `library_test` database (created b
 ## RLS (row-level security)
 
 Runtime DB traffic runs as the limited `library_app` role. `FORCE ROW LEVEL SECURITY` is enabled on `borrowings` and `users`; books are a shared catalog with no RLS. Per-request context (`app.current_user_id`, `app.current_role`) is set via `set_config(..., false)` on the `pgsql_app` connection, so members only see their own rows. The superuser (`library_postgres`) bypasses RLS and is reserved for migrations, seeding, tests, and the overdue batch job.
+
+## Manual Testing
+
+1. Start: `docker compose up --build`, then `docker compose ps` — db, app, nginx must be `healthy`. Open http://localhost:8000/up (HTTP 200).
+2. Login as `library` / `password`. Register two members at `/register` (e.g. `alice`, `bob`).
+3. Employee: add a book, edit it, search/filter, delete an available book.
+4. Employee → Borrow: lend a book to alice (7 days). Expect toast "Peminjaman dicatat", book becomes Borrowed. Record the return; book becomes Available.
+5. Wrong input: add a book with a duplicate ISBN or empty page count → validation error, nothing saved. Borrow with period 8 → rejected.
+6. Reservations: as bob reserve a Borrowed book → queue position shown; return the book → bob gets "Ready for pickup".
+7. Isolation: alice sees only her borrowings/reservations; bob only his. A member opening `/employee/books` gets 403. Employee sees everything.
+8. Persistence: `docker compose down` (no `-v`), `docker compose up -d`, log in — data is still there.
+9. Failure + recovery: `docker stop library-app-db` → app shows an error; diagnose with `docker compose ps` and `docker compose logs app`; recover with `docker start library-app-db` — app works again, no data lost.
+10. Automated RLS suite: `docker compose exec app php artisan test`.
+
+x
