@@ -4,8 +4,6 @@ Small library app: employees manage books, members, borrowing, and returns; memb
 
 ## Overview
 Role	Pages	What they can do
-
-| Kolom 1 | Kolom 2 | kolom 3 |
 | :---: | :---: | :---: |
 | Role | Pages | What They Can Do |
 | Employee | Buku, Borrow, Members, Reservation |Add/edit/delete books (search, filter, pagination); record borrowing and returning; manage members; see and cancel all reservations|
@@ -36,6 +34,33 @@ docker compose down                        # add -v to also wipe the DB volume
 
 `public/phpinfo-check.php` is a local XAMPP diagnostic and is excluded from the
 Docker image.
+
+## How to Run
+
+Install Docker Desktop (or Docker Engine) with Compose v2, and Git. Make sure ports 8000 and 5433 are free.
+Get the code: git clone <repo-url> then cd into the project folder.
+Start everything:
+bash
+   docker compose up --build
+First boot builds the images, waits for Postgres, runs migrations, and seeds the employee account and sample books once. Use docker compose up -d --build to run in the background. 4. Wait until healthy: run docker compose ps in another terminal; db, app, and nginx should show healthy. 5. Open http://localhost:8000 and log in as library / password (employee), or register a member at /register. 6. Stop with docker compose down (data is kept). docker compose down -v also deletes the database volume, so avoid it before a demo.
+
+## Services, ports, and health checks
+
+|---|---|---|---|---|
+| Service |	Container	| Role	| Host port |	Health check |
+| nginx |library-app-nginx | Reverse proxy, only web entry point |	8000 | GET /up |
+| app |	library-app	| Laravel on PHP-FPM |	none (9000 internal) |	php-fpm -t |
+| db |	library-app-db |	PostgreSQL 16, volume library_pgdata |	5433 |	pg_isready |
+| scheduler	| library-app-scheduler	| schedule:work (reservation expiry, overdue flag) |	none	| none (serves no requests) |
+
+## Logs
+
+|---|---|---|
+| Source |	What it shows	| How to view |
+| nginx |	Every HTTP request (method, path, status code) and proxy errors |	docker compose logs nginx |
+| app | PHP-FPM output and Laravel errors (e.g. database connection failures) |	docker compose logs app |
+| db |	PostgreSQL startup, init script, and errors |	docker compose logs db |
+| scheduler | Each scheduled run, e.g. reservations:expire and borrowings:mark-overdue|	docker compose logs scheduler |
 
 ## Setup (host, without Docker)
 
