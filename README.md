@@ -4,8 +4,9 @@ Small library app: employees manage books, members, borrowing, and returns; memb
 
 ## Overview
 Role	Pages	What they can do
+
+| Role | Username | Password | Notes |
 | :---: | :---: | :---: |
-| Role | Pages | What They Can Do |
 | Employee | Buku, Borrow, Members, Reservation |Add/edit/delete books (search, filter, pagination); record borrowing and returning; manage members; see and cancel all reservations|
 |Member |Koleksi Buku, Pinjaman Saya, My Reservations |Browse and search the catalog; reserve a book; see only their own current and past borrowings with due dates and reminders; track and cancel their own reservations |
 
@@ -133,7 +134,7 @@ Runtime DB traffic runs as the limited `library_app` role. `FORCE ROW LEVEL SECU
 
 ## Manual Testing
 
-1. Start: `docker compose up --build`, then `docker compose ps` — db, app, nginx must be `healthy`. '''bash Open http://localhost:8000/up (HTTP 200).'''
+1. Start: `docker compose up --build`, then `docker compose ps` — db, app, nginx must be `healthy`. Open http://localhost:8000/up (HTTP 200).
 2. Login as `library` / `password`. Register two members at `/register` (e.g. `alice`, `bob`).
 3. Employee: add a book, edit it, search/filter, delete an available book.
 4. Employee → Borrow: lend a book to alice (7 days). Expect toast "Peminjaman dicatat", book becomes Borrowed. Record the return; book becomes Available.
