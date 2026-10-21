@@ -133,7 +133,7 @@ Runtime DB traffic runs as the limited `library_app` role. `FORCE ROW LEVEL SECU
 
 ## Manual Testing
 
-1. Start: `docker compose up --build`, then `docker compose ps` — db, app, nginx must be `healthy`. Open http://localhost:8000/up (HTTP 200).
+1. Start: `docker compose up --build`, then `docker compose ps` — db, app, nginx must be `healthy`. '''bash Open http://localhost:8000/up (HTTP 200).'''
 2. Login as `library` / `password`. Register two members at `/register` (e.g. `alice`, `bob`).
 3. Employee: add a book, edit it, search/filter, delete an available book.
 4. Employee → Borrow: lend a book to alice (7 days). Expect toast "Peminjaman dicatat", book becomes Borrowed. Record the return; book becomes Available.
