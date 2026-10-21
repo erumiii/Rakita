@@ -38,12 +38,65 @@ Docker image.
 
 ## How to Run
 
-Install Docker Desktop (or Docker Engine) with Compose v2, and Git. Make sure ports 8000 and 5433 are free.
-Get the code: git clone <repo-url> then cd into the project folder.
-Start everything:
-bash
+### Prerequisites
+
+- Docker Desktop (or Docker Engine) with Docker Compose v2
+- Git
+- Ports **8000** (web) and **5433** (PostgreSQL) must be free
+
+### Steps
+
+1. Clone the repository and open the project folder:
+
+```bash
+   git clone <repo-url>
+   cd <project-folder>
+```
+
+2. Start all services (first run builds the images, runs migrations, and seeds sample data once):
+
+```bash
    docker compose up --build
-First boot builds the images, waits for Postgres, runs migrations, and seeds the employee account and sample books once. Use docker compose up -d --build to run in the background. 4. Wait until healthy: run docker compose ps in another terminal; db, app, and nginx should show healthy. 5. Open http://localhost:8000 and log in as library / password (employee), or register a member at /register. 6. Stop with docker compose down (data is kept). docker compose down -v also deletes the database volume, so avoid it before a demo.
+```
+
+   To run in the background, use `docker compose up -d --build`.
+
+3. Wait until the services are healthy (run this in another terminal):
+
+```bash
+   docker compose ps
+```
+
+   `db`, `app`, and `nginx` should show `healthy`.
+
+4. Open the application at http://localhost:8000 and check the health endpoint at http://localhost:8000/up (HTTP 200).
+
+5. Log in:
+
+   - Employee: username `library`, password `password` (seeded account)
+   - Member: register a new account at http://localhost:8000/register
+
+### Stop and reset
+
+- Stop the containers and keep the data:
+
+```bash
+  docker compose down
+```
+
+- Stop and also delete the database volume (all data is lost):
+
+```bash
+  docker compose down -v
+```
+
+  Do not use `-v` before a demo.
+
+### Common problems
+
+- `port is already allocated`: another program uses port 8000 or 5433. Stop it, or change the port mapping in `docker-compose.yml`.
+- A service is not `healthy`: check `docker compose logs app nginx db`. `nginx` waits for `app`, and `app` waits for `db`.
+- Cannot log in after `down -v`: the seed data is recreated on the next start; wait for the migration and seeding to finish in the logs.
 
 ## Services, ports, and health checks
 
