@@ -5,10 +5,10 @@ Small library app: employees manage books, members, borrowing, and returns; memb
 ## Overview
 Role	Pages	What they can do
 
-| Role | Username | Password | Notes |
-| :---: | :---: | :---: |
-| Employee | Buku, Borrow, Members, Reservation |Add/edit/delete books (search, filter, pagination); record borrowing and returning; manage members; see and cancel all reservations|
-|Member |Koleksi Buku, Pinjaman Saya, My Reservations |Browse and search the catalog; reserve a book; see only their own current and past borrowings with due dates and reminders; track and cancel their own reservations |
+| Role | Pages | What they can do |
+|---|---|---|
+| Employee | Buku, Borrow, Members, Reservations | Add/edit/delete books (search, filter, pagination); record borrowing and returning; manage members; see and cancel all reservations |
+| Member | Koleksi Buku, Pinjaman Saya, My Reservations | Browse and search the catalog; reserve a book; see only their own current and past borrowings with due dates and reminders; track and cancel their own reservations |
 
 ## Stack
 
@@ -47,8 +47,8 @@ First boot builds the images, waits for Postgres, runs migrations, and seeds the
 
 ## Services, ports, and health checks
 
-|---|---|---|---|---|
 | Service |	Container	| Role	| Host port |	Health check |
+|---|---|---|---|---|
 | nginx |library-app-nginx | Reverse proxy, only web entry point |	8000 | GET /up |
 | app |	library-app	| Laravel on PHP-FPM |	none (9000 internal) |	php-fpm -t |
 | db |	library-app-db |	PostgreSQL 16, volume library_pgdata |	5433 |	pg_isready |
@@ -56,8 +56,9 @@ First boot builds the images, waits for Postgres, runs migrations, and seeds the
 
 ## Logs
 
-|---|---|---|
+
 | Source |	What it shows	| How to view |
+|---|---|---|
 | nginx |	Every HTTP request (method, path, status code) and proxy errors |	docker compose logs nginx |
 | app | PHP-FPM output and Laravel errors (e.g. database connection failures) |	docker compose logs app |
 | db |	PostgreSQL startup, init script, and errors |	docker compose logs db |
