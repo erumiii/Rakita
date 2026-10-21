@@ -38,8 +38,6 @@ Docker image.
 
 ## Rakita Installation Steps
 
-### Installation Steps
-
 1. Clone the repo
 
 ```bash
