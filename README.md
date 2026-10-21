@@ -36,32 +36,46 @@ docker compose down                        # add -v to also wipe the DB volume
 `public/phpinfo-check.php` is a local XAMPP diagnostic and is excluded from the
 Docker image.
 
-## How to Run
+## Rakita Installation Steps
 
-### Prerequisites
+### Installation Steps
 
-- Docker Desktop (or Docker Engine) with Docker Compose v2
-- Git
-- Ports **8000** (web) and **5433** (PostgreSQL) must be free
-
-### Steps
-
-1. Clone the repository and open the project folder:
+1. Clone the repo
 
 ```bash
-   git clone <repo-url>
-   cd <project-folder>
+   git clone https://github.com/erumiii/Rakita.git
+   cd Rakita
 ```
 
-2. Start all services (first run builds the images, runs migrations, and seeds sample data once):
+2. Create the `.env` file
+
+```bash
+   cp .env.example .env
+```
+
+3. Generate the app key
+
+```bash
+   echo "base64:$(openssl rand -base64 32)"
+```
+
+   Paste the output to `APP_KEY` inside the `.env` file.
+
+4. Change `DB_HOST` to the database service name inside the `.env` file
+
+```env
+   DB_HOST=db
+```
+
+5. Start the services using Docker Compose
 
 ```bash
    docker compose up --build
 ```
 
-   To run in the background, use `docker compose up -d --build`.
+   The first run builds the images, waits for PostgreSQL, runs the migrations, and seeds the sample data once. To run in the background, use `docker compose up -d --build`.
 
-3. Wait until the services are healthy (run this in another terminal):
+6. List the running containers and check their health
 
 ```bash
    docker compose ps
@@ -69,34 +83,16 @@ Docker image.
 
    `db`, `app`, and `nginx` should show `healthy`.
 
-4. Open the application at http://localhost:8000 and check the health endpoint at http://localhost:8000/up (HTTP 200).
+7. Access the web
 
-5. Log in:
+   Open http://localhost:8000 in your browser (or `<host-ip>:8000` if the app runs on another machine).
+   Health check endpoint: http://localhost:8000/up (HTTP 200).
+
+8. Log in
 
    - Employee: username `library`, password `password` (seeded account)
    - Member: register a new account at http://localhost:8000/register
 
-### Stop and reset
-
-- Stop the containers and keep the data:
-
-```bash
-  docker compose down
-```
-
-- Stop and also delete the database volume (all data is lost):
-
-```bash
-  docker compose down -v
-```
-
-  Do not use `-v` before a demo.
-
-### Common problems
-
-- `port is already allocated`: another program uses port 8000 or 5433. Stop it, or change the port mapping in `docker-compose.yml`.
-- A service is not `healthy`: check `docker compose logs app nginx db`. `nginx` waits for `app`, and `app` waits for `db`.
-- Cannot log in after `down -v`: the seed data is recreated on the next start; wait for the migration and seeding to finish in the logs.
 
 ## Services, ports, and health checks
 
@@ -188,15 +184,33 @@ Runtime DB traffic runs as the limited `library_app` role. `FORCE ROW LEVEL SECU
 
 ## Manual Testing
 
-1. Start: `docker compose up --build`, then `docker compose ps` — db, app, nginx must be `healthy`. Open http://localhost:8000/up (HTTP 200).
-2. Login as `library` / `password`. Register two members at `/register` (e.g. `alice`, `bob`).
-3. Employee: add a book, edit it, search/filter, delete an available book.
-4. Employee → Borrow: lend a book to alice (7 days). Expect toast "Peminjaman dicatat", book becomes Borrowed. Record the return; book becomes Available.
-5. Wrong input: add a book with a duplicate ISBN or empty page count → validation error, nothing saved. Borrow with period 8 → rejected.
-6. Reservations: as bob reserve a Borrowed book → queue position shown; return the book → bob gets "Ready for pickup".
-7. Isolation: alice sees only her borrowings/reservations; bob only his. A member opening `/employee/books` gets 403. Employee sees everything.
-8. Persistence: `docker compose down` (no `-v`), `docker compose up -d`, log in — data is still there.
-9. Failure + recovery: `docker stop library-app-db` → app shows an error; diagnose with `docker compose ps` and `docker compose logs app`; recover with `docker start library-app-db` — app works again, no data lost.
-10. Automated RLS suite: `docker compose exec app php artisan test`.
+1. **Start the stack**
+   Run `docker compose up --build`, then `docker compose ps`. `db`, `app`, and `nginx` must be `healthy`. Open http://localhost:8000/up (HTTP 200).
 
+2. **Login**
+   Log in as `library` / `password`. Register two members at `/register` (e.g. `alice`, `bob`).
+
+3. **Books (employee)**
+   Add a book, edit it, search/filter, and delete an available book.
+
+4. **Borrow and return**
+   Employee → Borrow: lend a book to `alice` (7 days). Expect the toast "Peminjaman dicatat" and the book becomes Borrowed. Record the return; the book becomes Available.
+
+5. **Wrong input**
+   Add a book with a duplicate ISBN or an empty page count: validation error, nothing saved. Borrow with a period of 8 days: rejected.
+
+6. **Reservations**
+   As `bob`, reserve a Borrowed book: the queue position is shown. Return the book: `bob` gets "Ready for pickup".
+
+7. **Isolation**
+   `alice` sees only her own borrowings and reservations, `bob` only his. A member opening `/employee/books` gets 403. The employee sees everything.
+
+8. **Persistence**
+   Run `docker compose down` (no `-v`), then `docker compose up -d` and log in: the data is still there.
+
+9. **Failure and recovery**
+   Run `docker stop library-app-db`: the app shows an error. Diagnose with `docker compose ps` and `docker compose logs app`. Recover with `docker start library-app-db`: the app works again and no data is lost.
+
+10. **Automated RLS tests**
+    Run `docker compose exec app php artisan test`.
 x
