@@ -7,10 +7,9 @@ Role	Pages	What they can do
 
 | Kolom 1 | Kolom 2 | kolom 3 |
 | :--- | :---: | ---: |
-| Kiri (Default) | Tengah| Kanan |
 | Role | Pages | What They Can Do |
-| Employee | Buku, Borrow, Members, Reservation | Add/edit/delete books (search, filter, pagination); record borrowing and returning; manage members; see and cancel all reservations|
-|Member |	Koleksi Buku, Pinjaman Saya, My Reservations |	Browse and search the catalog; reserve a book; see only their own current and past borrowings with due dates and reminders; track and cancel their own reservations |
+| Employee | Buku, Borrow, Members, Reservation |Add/edit/delete books (search, filter, pagination); record borrowing and returning; manage members; see and cancel all reservations|
+|Member |Koleksi Buku, Pinjaman Saya, My Reservations |Browse and search the catalog; reserve a book; see only their own current and past borrowings with due dates and reminders; track and cancel their own reservations |
 
 ## Stack
 
