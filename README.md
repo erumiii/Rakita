@@ -1,19 +1,23 @@
 # Library Management System
 
-Small library app: employees manage books, members, borrowing, and returns; members browse the catalog and see their own borrowings. Laravel 12 + PostgreSQL 16 with row-level security enforced in the database.
-
 ## Overview
+A small library app management that handle books management, borrowing, and book reservation. This application has two role of user: <br>
+1. Employee: manage books, members, borrowing, and book returns.
+2. Members: browse the catalog, make a reservation request, and see their own borrowings.
+
+## Roles
 Role	Pages	What they can do
 
 | Role | Pages | What they can do |
 |---|---|---|
-| Employee | Buku, Borrow, Members, Reservations | Add/edit/delete books (search, filter, pagination); record borrowing and returning; manage members; see and cancel all reservations |
-| Member | Koleksi Buku, Pinjaman Saya, My Reservations | Browse and search the catalog; reserve a book; see only their own current and past borrowings with due dates and reminders; track and cancel their own reservations |
+| Employee | Books, Borrow, Reservations, Members | Add/edit/delete books (search, filter, pagination); record borrowing and returning; manage members; see and cancel all reservations |
+| Member | Books Collection, My Borrowings, My Reservations | Browse and search the catalog; reserve a book; see only their own current and past borrowings with due dates and reminders; track and cancel their own reservations |
 
 ## Stack
 
 - Laravel 12, Vite, Tailwind
 - PostgreSQL 16 (Docker), two DB roles: `library_postgres` (superuser, migrations/tests) and `library_app` (runtime, RLS applies)
+- Docker
 
 ## Services, ports, and health checks
 
