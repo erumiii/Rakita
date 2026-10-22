@@ -177,6 +177,7 @@ Requires the Docker DB running; tests use the `library_test` database (created b
     Run `docker compose exec app php artisan test`.
 
 ## Project Structure
+```
 Rakita/
 ├── .dockerignore
 ├── .editorconfig
@@ -375,6 +376,7 @@ Rakita/
     │   └── ViewsSmokeTest.php
     └── Unit/
         └── ExampleTest.php
+```
 
 ## Contributors
 - [@erumiii](https://github.com/erumiii)
