@@ -15,26 +15,37 @@ Role	Pages	What they can do
 - Laravel 12, Vite, Tailwind
 - PostgreSQL 16 (Docker), two DB roles: `library_postgres` (superuser, migrations/tests) and `library_app` (runtime, RLS applies)
 
-## Quick start (Docker)
+## Services, ports, and health checks
+
+| Service |	Container	| Role	| Host port |	Health check |
+|---|---|---|---|---|
+| nginx |library-app-nginx | Reverse proxy, only web entry point |	8000 | GET /up |
+| app |	library-app	| Laravel on PHP-FPM |	none (9000 internal) |	php-fpm -t |
+| db |	library-app-db |	PostgreSQL 16, volume library_pgdata |	5433 |	pg_isready |
+| scheduler	| library-app-scheduler	| schedule:work (reservation expiry, overdue flag) |	none	| none (serves no requests) |
+
+## Logs
+
+
+| Source |	What it shows	| How to view |
+|---|---|---|
+| nginx |	Every HTTP request (method, path, status code) and proxy errors |	docker compose logs nginx |
+| app | PHP-FPM output and Laravel errors (e.g. database connection failures) |	docker compose logs app |
+| db |	PostgreSQL startup, init script, and errors |	docker compose logs db |
+| scheduler | Each scheduled run, e.g. reservations:expire and borrowings:mark-overdue|	docker compose logs scheduler |
+
+## Setup (host, without Docker)
 
 ```bash
-docker compose up --build   # app on http://localhost:8000, Postgres on localhost:5433
+docker compose up -d db     # Postgres 16 on port 5433 (creates library_app role + library_test DB)
+composer install
+npm install
+cp .env.example .env        # sensible defaults already filled in
+php artisan key:generate
+php artisan migrate --seed  # creates the schema and seeds the employee account
+npm run build
+php artisan serve           # http://localhost:8000
 ```
-
-First boot builds the images, waits for Postgres, runs migrations, seeds once
-(employee `library` / `password` + sample books), then starts nginx (port 8000,
-proxying to the PHP-FPM app container) and the scheduler container
-(`schedule:work`). Restarts are safe: seeding only happens while the `users`
-table is empty.
-
-```bash
-docker compose exec app php artisan test   # RLS suite (uses library_test)
-docker compose logs -f nginx app scheduler
-docker compose down                        # add -v to also wipe the DB volume
-```
-
-`public/phpinfo-check.php` is a local XAMPP diagnostic and is excluded from the
-Docker image.
 
 ## Rakita Installation Steps
 
@@ -91,39 +102,6 @@ Docker image.
    - Employee: username `library`, password `password` (seeded account)
    - Member: register a new account at http://localhost:8000/register
 
-
-## Services, ports, and health checks
-
-| Service |	Container	| Role	| Host port |	Health check |
-|---|---|---|---|---|
-| nginx |library-app-nginx | Reverse proxy, only web entry point |	8000 | GET /up |
-| app |	library-app	| Laravel on PHP-FPM |	none (9000 internal) |	php-fpm -t |
-| db |	library-app-db |	PostgreSQL 16, volume library_pgdata |	5433 |	pg_isready |
-| scheduler	| library-app-scheduler	| schedule:work (reservation expiry, overdue flag) |	none	| none (serves no requests) |
-
-## Logs
-
-
-| Source |	What it shows	| How to view |
-|---|---|---|
-| nginx |	Every HTTP request (method, path, status code) and proxy errors |	docker compose logs nginx |
-| app | PHP-FPM output and Laravel errors (e.g. database connection failures) |	docker compose logs app |
-| db |	PostgreSQL startup, init script, and errors |	docker compose logs db |
-| scheduler | Each scheduled run, e.g. reservations:expire and borrowings:mark-overdue|	docker compose logs scheduler |
-
-## Setup (host, without Docker)
-
-```bash
-docker compose up -d db     # Postgres 16 on port 5433 (creates library_app role + library_test DB)
-composer install
-npm install
-cp .env.example .env        # sensible defaults already filled in
-php artisan key:generate
-php artisan migrate --seed  # creates the schema and seeds the employee account
-npm run build
-php artisan serve           # http://localhost:8000
-```
-
 ## Seeded account
 
 | Role | Username | Password | Notes |
@@ -158,16 +136,6 @@ Members reserve books from the catalog (`/member/books`) and track their queue a
 - Scheduled command `reservations:expire` (every minute) expires stale offers and promotes the next in line — it also covers member-side cancellations, since member RLS may not touch other members' rows.
 - RLS: members only see/cancel their own rows; employees see all.
 
-## Overdue handling
-
-Scheduled command `borrowings:mark-overdue` flags unreturned past-due borrowings. Run the scheduler every minute, e.g. cron:
-
-```
-* * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1
-```
-
-Without the scheduler running, overdue status still shows in the UI: the member borrowing list calls `borrow_reminder()` on each due date, so late items are flagged on view.
-
 ## Tests
 
 ```bash
@@ -175,10 +143,6 @@ php artisan test
 ```
 
 Requires the Docker DB running; tests use the `library_test` database (created by `docker/create_db.sql` on first container start). Each RLS test runs `migrate:fresh` + reseed per test — expect a slower suite.
-
-## RLS (row-level security)
-
-Runtime DB traffic runs as the limited `library_app` role. `FORCE ROW LEVEL SECURITY` is enabled on `borrowings` and `users`; books are a shared catalog with no RLS. Per-request context (`app.current_user_id`, `app.current_role`) is set via `set_config(..., false)` on the `pgsql_app` connection, so members only see their own rows. The superuser (`library_postgres`) bypasses RLS and is reserved for migrations, seeding, tests, and the overdue batch job.
 
 ## Manual Testing
 
@@ -211,4 +175,208 @@ Runtime DB traffic runs as the limited `library_app` role. `FORCE ROW LEVEL SECU
 
 10. **Automated RLS tests**
     Run `docker compose exec app php artisan test`.
-x
+
+## Project Structure
+Rakita/
+├── .dockerignore
+├── .editorconfig
+├── .env.example
+├── .gitattributes
+├── .gitignore
+├── Dockerfile
+├── README.md
+├── artisan
+├── composer.json
+├── composer.lock
+├── design.md
+├── docker-compose.yml
+├── package.json
+├── package-lock.json
+├── phpunit.xml
+├── vite.config.js
+│
+├── app/
+│   ├── Console/
+│   │   └── Commands/
+│   │       ├── ExpireReservations.php
+│   │       ├── GenerateNotifications.php
+│   │       └── MarkOverdue.php
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.php
+│   │   │   ├── Controller.php
+│   │   │   ├── NotificationController.php
+│   │   │   ├── Employee/
+│   │   │   │   ├── BookController.php
+│   │   │   │   ├── BorrowController.php
+│   │   │   │   ├── HistoryController.php
+│   │   │   │   ├── MemberController.php
+│   │   │   │   ├── ReservationController.php
+│   │   │   │   └── ReturnController.php
+│   │   │   └── Member/
+│   │   │       ├── BookController.php
+│   │   │       ├── BorrowingController.php
+│   │   │       └── ReservationController.php
+│   │   ├── Middleware/
+│   │   │   ├── EnsureRole.php
+│   │   │   └── SetDbSession.php
+│   │   └── Requests/
+│   │       ├── LoginRequest.php
+│   │       ├── RegisterRequest.php
+│   │       ├── StoreBookRequest.php
+│   │       ├── StoreBorrowingRequest.php
+│   │       ├── StoreReturnRequest.php
+│   │       ├── UpdateBookRequest.php
+│   │       └── UpdateMemberRequest.php
+│   ├── Models/
+│   │   ├── Book.php
+│   │   ├── Borrowing.php
+│   │   ├── Notification.php
+│   │   ├── Reservation.php
+│   │   └── User.php
+│   ├── Providers/
+│   │   └── AppServiceProvider.php
+│   ├── Services/
+│   │   ├── BorrowingService.php
+│   │   ├── NotificationService.php
+│   │   └── ReservationService.php
+│   └── Support/
+│       ├── DbSession.php
+│       └── helpers.php
+│
+├── bootstrap/
+│   ├── app.php
+│   ├── providers.php
+│   └── cache/
+│
+├── config/
+│   ├── app.php
+│   ├── auth.php
+│   ├── cache.php
+│   ├── database.php
+│   ├── filesystems.php
+│   ├── logging.php
+│   ├── mail.php
+│   ├── queue.php
+│   ├── services.php
+│   └── session.php
+│
+├── database/
+│   ├── edit-rules-old.php
+│   ├── factories/
+│   │   ├── BookFactory.php
+│   │   ├── BorrowingFactory.php
+│   │   ├── ReservationFactory.php
+│   │   └── UserFactory.php
+│   ├── migrations/
+│   │   ├── 0001_01_01_000000_create_users_table.php
+│   │   ├── 0001_01_01_000001_create_cache_table.php
+│   │   ├── 0001_01_01_000002_create_jobs_table.php
+│   │   ├── 2026_10_14_000010_create_books_table.php
+│   │   ├── 2026_10_14_000020_create_borrowings_table.php
+│   │   ├── 2026_10_14_000030_setup_rls.php
+│   │   ├── 2026_10_15_000040_create_reservations_table.php
+│   │   └── 2026_10_16_000050_create_notifications_table.php
+│   └── seeders/
+│       └── DatabaseSeeder.php
+│
+├── docker/
+│   ├── create_db.sql
+│   ├── entrypoint.sh
+│   ├── nginx.conf
+│   └── seed_once.php
+│
+│
+├── public/
+│   ├── .htaccess
+│   ├── favicon.ico
+│   ├── index.php
+│   └── robots.txt
+│
+├── resources/
+│   ├── css/
+│   │   └── app.css
+│   ├── js/
+│   │   ├── app.js
+│   │   └── bootstrap.js
+│   └── views/
+│       ├── welcome.blade.php
+│       ├── auth/
+│       │   ├── login.blade.php
+│       │   └── register.blade.php
+│       ├── components/
+│       │   ├── alert.blade.php
+│       │   ├── badge.blade.php
+│       │   ├── confirm.blade.php
+│       │   ├── errors.blade.php
+│       │   ├── icon.blade.php
+│       │   ├── input.blade.php
+│       │   ├── layout.blade.php
+│       │   ├── modal.blade.php
+│       │   ├── nav-item.blade.php
+│       │   ├── notification-bell.blade.php
+│       │   └── section.blade.php
+│       ├── employee/
+│       │   ├── books/
+│       │   │   └── index.blade.php
+│       │   ├── borrowings/
+│       │   │   └── history.blade.php
+│       │   ├── members/
+│       │   │   └── index.blade.php
+│       │   └── reservations/
+│       │       └── index.blade.php
+│       ├── member/
+│       │   ├── books/
+│       │   │   ├── index.blade.php
+│       │   │   └── show.blade.php
+│       │   ├── borrowings/
+│       │   │   └── index.blade.php
+│       │   └── reservations/
+│       │       └── index.blade.php
+│       └── vendor/
+│           └── pagination/
+│               └── tailwind.blade.php
+│
+├── routes/
+│   ├── console.php
+│   └── web.php
+│
+├── storage/
+│   ├── app/
+│   │   ├── private/
+│   │   └── public/
+│   ├── framework/
+│   │   ├── cache/
+│   │   │   └── data/
+│   │   ├── sessions/
+│   │   ├── testing/
+│   │   └── views/
+│   └── logs/
+│
+└── tests/
+    ├── TestCase.php
+    ├── Feature/
+    │   ├── AuthTest.php
+    │   ├── BorrowReturnTest.php
+    │   ├── EmployeeBooksTest.php
+    │   ├── EmployeeMembersTest.php
+    │   ├── ExampleTest.php
+    │   ├── MarkOverdueTest.php
+    │   ├── MemberPortalTest.php
+    │   ├── NotificationsCommandTest.php
+    │   ├── NotificationsEventTest.php
+    │   ├── NotificationsRlsTest.php
+    │   ├── NotificationsServiceTest.php
+    │   ├── NotificationsUiTest.php
+    │   ├── PortalAccessTest.php
+    │   ├── ReservationTest.php
+    │   ├── RlsBootTest.php
+    │   ├── SessionDeactivationTest.php
+    │   └── ViewsSmokeTest.php
+    └── Unit/
+        └── ExampleTest.php
+
+## Contributors
+- [@erumiii](https://github.com/erumiii)
+- [@saintbobi](https://github.com/saintbobi)
+- [@tepgoo](https://github.com/tepgoo)
