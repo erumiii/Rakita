@@ -379,6 +379,6 @@ Rakita/
 ```
 
 ## Contributors
-- [@erumiii](https://github.com/erumiii)
-- [@saintbobi](https://github.com/saintbobi)
-- [@tepgoo](https://github.com/tepgoo)
+- [@erumiii](https://github.com/erumiii) - Keenan
+- [@saintbobi](https://github.com/saintbobi) - Abby
+- [@tepgoo](https://github.com/tepgoo) - Stefany
